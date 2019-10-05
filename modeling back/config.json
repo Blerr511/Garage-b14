@@ -1,0 +1,7 @@
+{
+  "client": {
+    "hostname": "http://localhost:3000"
+  },
+
+  "JWTsecret": "BlerrIsHeree"
+}
