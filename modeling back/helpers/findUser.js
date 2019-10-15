@@ -1,7 +1,6 @@
 const User = require('../mongoose/Schemas').User;
 const Notification = require('../mongoose/Schemas').Notification;
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
 const CONFIG = require('../config.json');
 
 module.exports = async (username, password) => {

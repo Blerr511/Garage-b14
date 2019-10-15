@@ -4,7 +4,8 @@ mongoose.connect(
   'mongodb://localhost/modeling',
   {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useCreateIndex: true
   },
   err => {
     if (err) console.log(err);
