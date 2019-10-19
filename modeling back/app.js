@@ -41,16 +41,18 @@ const decodeJWT = require('./helpers/decodeJWT'),
   getServices = require('./helpers/pages/services').get,
   addServices = require('./helpers/pages/services').addService,
   removeServices = require('./helpers/pages/services').removeService,
-  editServices = require('./helpers/pages/services').editService;
-portfolio = require('./helpers/pages/portfolio');
+  editServices = require('./helpers/pages/services').editService,
+  portfolio = require('./helpers/pages/portfolio'),
+  getPages = require('./helpers/pages/get'),
+  addPages = require('./helpers/addPage');
 const upload = multer({ storage: storage });
-const CONFIG = require('./config.json');
 
 const app = express();
 const server = http.Server(app);
 const corsOptions = {
-  origin: CONFIG.client.hostname,
-  credentials: true
+  origin: process.env.CLIENT,
+  credentials: true,
+  allowedHeaders: ['Content-Type']
 };
 app.use(cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -78,7 +80,6 @@ app.post(
           .send({ code: 400, message: 'Enter username and password !' });
       }
     }
-    res.send('token');
   },
   decodeJWT
 );
@@ -99,6 +100,9 @@ app.patch('/api/services', upload.single('img'), editServices);
 app.get('/api/portfolio', portfolio.get);
 app.post('/api/portfolio', upload.single('bg'), portfolio.set);
 app.put('/api/portfolio', upload.single('img'), portfolio.add);
+
+app.post('/api/addpage', addPages);
+app.get('/api/get', getPages);
 server.listen(process.env.PORT || 8080, () =>
   console.log(`app listen ${process.env.PORT || 8080}`)
 );

@@ -1,50 +1,30 @@
-.myNavBar {
-  position: absolute;
-  top: 4%;
+.navbar {
+  position: fixed;
+  top: 0;
   left: 0;
-  width: 93%;
+  width: 80%;
+  padding: 0 10%;
   display: grid;
   grid-template-columns: 1fr 2fr;
   grid-template-rows: auto;
   z-index: 10;
 }
-
-.myNavBar ul {
-  padding: 0;
+.navbar ul {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: flex-end;
+  padding-top: 20px;
 }
-
-.myNavBar a {
-  font-size: 24px;
-  color: #ffffffdd;
-  margin: 0 10px;
+.navbar ul li a {
+  color: #fff;
+  font-size: 18px;
+  padding: 8px 12px;
+  margin: 5px;
+  border-radius: 2px;
+  transition-duration: 0.5s;
   white-space: nowrap;
 }
-
-@media only screen and (max-width: 760px) {
-  .myNavBar {
-    grid-template-columns: 0fr 1fr;
-    top: 0%;
-    width: 100%;
-  }
-  .myNavBar img {
-    height: 0px !important;
-  }
-  .myNavBar a {
-    margin: 0;
-  }
-  .myNavBar ul {
-    flex-wrap: nowrap;
-    flex-direction: column;
-    justify-content: flex-start;
-    background-color: #300510;
-    margin: 0;
-  }
-  .myNavBar ul li {
-    border-bottom: 3px solid #2b050f;
-  }
-  .menuBars {
-    display: block !important;
-  }
+.navbar ul li a:hover,
+.navbar ul li .active {
+  background-color: #ffe15f;
+  color: black;
 }

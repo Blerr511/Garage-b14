@@ -1,0 +1,94 @@
+.contactus {
+  width: 100%;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-attachment: fixed;
+  color: #fff;
+
+  footer {
+    color: #ccc;
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    right: 10%;
+    left: 10%;
+    bottom: 5%;
+    margin: 20px 0;
+    font-size: 24px;
+  }
+  h2 {
+    font-size: 42px;
+    font-weight: 100;
+  }
+  p {
+    font-size: 18px;
+  }
+
+  span {
+    font-size: 24px;
+    position: relative;
+  }
+  > div {
+    padding: 10%;
+    padding-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+
+    > div {
+      margin: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      > div {
+        max-width: 50%;
+        display: flex;
+        flex-direction: column;
+        textarea {
+          margin: 10px 0;
+        }
+        textarea,
+        input {
+          background-color: black;
+          outline: none;
+          border: 2px solid white;
+          padding: 10px;
+          padding-left: 20px;
+
+          font-size: 18px;
+          color: #fff;
+        }
+        ::placeholder {
+          color: #fff;
+        }
+        button {
+          padding: 10px;
+          padding-left: 20px;
+          outline: none;
+          background-color: #ffe15f;
+          border: none;
+          cursor: pointer;
+          text-align: left;
+          font-size: 18px;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+.address {
+  position: relative;
+  display: block;
+}
+.address::before {
+  content: '';
+  background-image: url('../../assets/img/mark.png');
+  background-size: cover;
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+}

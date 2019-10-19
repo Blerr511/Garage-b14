@@ -1,0 +1,16 @@
+.soclinks {
+  position: absolute;
+  left: 5%;
+  bottom: 5%;
+}
+.soclinks span,
+.soclinks a {
+  color: #ccc;
+}
+.soclinks a:focus,
+.soclinks a:hover {
+  color: #0169a0;
+}
+.soclinks > span > span {
+  margin: 0 10px;
+}

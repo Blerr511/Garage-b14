@@ -1,31 +1,29 @@
-import React from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import Nav from "./components/nav/Nav";
-import { routes } from "./components/nav/Routes";
-import AdminPage from "./components/Admin/Admin";
-import "./App.css";
+import React from 'react';
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
+import Nav from './components/Nav/Nav';
+
+import { routes } from './routes/reoutes';
+
+import './App.less';
 const App = () => {
+  console.log(process.env.new);
   return (
-    <div className="App">
+    <div>
       <Router>
+        <Nav />
+
         <Switch>
-          <Route path="/admin" component={AdminPage} />
-          <Route
-            render={() => (
-              <div>
-                <Nav></Nav>
-                {routes.map(route => (
-                  <Route
-                    key={route.route}
-                    exact
-                    path={route.route}
-                    component={route.component}
-                  />
-                ))}
-              </div>
-            )}
-          />
+          {routes.map(el => {
+            return (
+              <Route
+                path={el.route}
+                component={el.component}
+                exact
+                key={el.route}
+              />
+            );
+          })}
         </Switch>
       </Router>
     </div>

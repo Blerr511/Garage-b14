@@ -1,0 +1,36 @@
+.team {
+  width: 100%;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-attachment: fixed;
+  color: #fff;
+  h2 {
+    font-size: 32px;
+  }
+  > div {
+    padding: 10%;
+    padding-bottom: 20px;
+    > section:not(.next) {
+      margin: 10% 0;
+    }
+    > section {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 100;
+      font-size: 16px;
+      > div {
+        max-width: 50%;
+      }
+      img {
+        min-height: 200px;
+      }
+    }
+    > section:nth-of-type(odd):not(.next) {
+      flex-direction: row-reverse;
+    }
+  }
+}

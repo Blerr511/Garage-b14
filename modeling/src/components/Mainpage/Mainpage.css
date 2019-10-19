@@ -1,0 +1,48 @@
+.mainPage {
+  scroll-behavior: smooth;
+}
+.mainPage .mainPageSection {
+  width: 100%;
+  height: 100vh;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.mainPage .mainPageSection > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.mainPage .mainPageSection > div img {
+  margin-right: 20px;
+}
+.mainPage .mainPageSection > div h3 {
+  font-size: 30px;
+  color: #fff;
+  text-overflow: ellipsis;
+  max-width: 400px;
+}
+.mainPage .verticalBar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: 5%;
+  min-width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.mainPage .verticalBar > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.mainPage .verticalBar > div a {
+  margin: 5px 0;
+}

@@ -30,12 +30,18 @@ const User = new mongoose.model('User', UserSchema);
 
 const page = new Schema({
   title: { type: String, required: true, default: 'title' },
+  titlePosition: { type: String, default: 'left' },
   desc: { type: String, required: false },
-  type: { type: String, required: true },
+  template: { type: String, required: true },
   bg: {
     type: String,
     required: true,
-    default: __dirname + '/static/placeholder.jpg'
+    default: '#000'
+  },
+  bgtype: {
+    type: String,
+    required: true,
+    default: 'color'
   },
   content: { type: mongoose.SchemaTypes.Mixed, required: false, default: null }
 });

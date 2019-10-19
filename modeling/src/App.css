@@ -1,62 +1,21 @@
+#root {
+  background-color: blue;
+}
+html {
+  scroll-behavior: smooth;
+}
 body {
-  text-align: center;
-  background-color: #000000;
-}
-.App > div {
-  animation: show 500ms linear forwards;
-}
-@keyframes show {
-  from {
-    opacity: 0.5;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-ul {
+  font-family: banschrift;
   padding: 0;
-}
-li {
-  list-style: none;
+  margin: 0;
 }
 a {
   text-decoration: none;
 }
-.verticalScroll {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 7%;
-  height: 100vh;
-  background-color: #300510;
-  z-index: 10;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+li {
+  list-style: none;
 }
-
-.scroller span {
-  display: block;
-  cursor: pointer;
-}
-.scroller > span {
-  background-color: #300510;
-  padding: 2px;
-  border-radius: 100%;
-  margin: 10px 0;
-}
-.scroller > .active {
-  background-color: #ffffffdd !important;
-}
-.scroller > span > span {
-  background-color: #300510;
-  padding: 4px;
-  border-radius: 100%;
-}
-.scroller > span > span > span {
-  padding: 7px;
-  border-radius: 100%;
-  background-color: #ffffffdd;
+@font-face {
+  font-family: banschrift;
+  src: url('assets/fonts/customFonts.ttf');
 }

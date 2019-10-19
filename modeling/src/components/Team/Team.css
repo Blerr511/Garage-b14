@@ -1,0 +1,36 @@
+.team {
+  width: 100%;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-attachment: fixed;
+  color: #fff;
+}
+.team h2 {
+  font-size: 32px;
+}
+.team > div {
+  padding: 10%;
+  padding-bottom: 20px;
+}
+.team > div > section:not(.next) {
+  margin: 10% 0;
+}
+.team > div > section {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 100;
+  font-size: 16px;
+}
+.team > div > section > div {
+  max-width: 50%;
+}
+.team > div > section img {
+  min-height: 200px;
+}
+.team > div > section:nth-of-type(odd):not(.next) {
+  flex-direction: row-reverse;
+}

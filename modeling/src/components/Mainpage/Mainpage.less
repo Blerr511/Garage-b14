@@ -1,0 +1,49 @@
+.mainPage {
+  scroll-behavior: smooth;
+
+  .mainPageSection {
+    width: 100%;
+    height: 100vh;
+    background-attachment: fixed;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    > div {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      img {
+        margin-right: 20px;
+      }
+      h3 {
+        font-size: 30px;
+        color: #fff;
+        text-overflow: ellipsis;
+        max-width: 400px;
+      }
+    }
+  }
+  .verticalBar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 5%;
+    min-width: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    > div {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      a {
+        margin: 5px 0;
+      }
+    }
+  }
+}
