@@ -77,12 +77,12 @@ export default function Message(props) {
     let timeout = null;
 
     if (timer) {
-      timeout = setTimeout(handleClose, timer);
+      timeout = setTimeout(handleClose, timer?timer:3000);
     }
     return () => {
       clearTimeout(timeout);
     };
-  }, []);
+  });
 
   return (
     <div>

@@ -9,7 +9,7 @@ module.exports.add = async (req, res) => {
   const newService = new Service({
     title: title,
     desc: desc,
-    img: (appRoot + '\\' + file.path).replace(/\\/g, '/')
+    img: file?(appRoot + '\\' + file.path).replace(/\\/g, '/'):''
   });
   const t = await Page.updateOne(
     { _id: pageId },

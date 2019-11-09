@@ -31,6 +31,8 @@ import IconButton from '@material-ui/core/IconButton';
 import Fab from '@material-ui/core/Fab';
 import Demo from '../Demo/Demo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { SketchPicker } from 'react-color';
+
 import {
   faSave,
   faTrash,
@@ -86,12 +88,40 @@ function VerticalTabs(props) {
   const [editable, setEditable] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [colorChange, setColorChange] = useState(false);
+  const [newBg, setNewBg] = useState(null);
+  const [bg, setBg] = useState('#000');
   const contentTitleRef = useRef();
   const contentDescRef = useRef();
   const contentFileRef = useRef();
+  const wrapperRef = useRef(null);
+  const bgChangeInputFileRef = useRef();
+  useOutsideAlerter(wrapperRef);
+
+  function useOutsideAlerter(ref) {
+    /**
+     * Alert if clicked on outside of element
+     */
+    function handleClickOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setColorChange(false);
+      }
+    }
+
+    useEffect(() => {
+      // Bind the event listener
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        // Unbind the event listener on clean up
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    });
+  }
   const [portfolioDialog, setPortfolioDialog] = useState(false);
+
   const editPageInfo = {};
-  const tempPages = pages;
+  const tempPages = pages.slice();
+
   const hundelPageInputEdit = (_, _id) => {
     tempPages.map(el => {
       if (el._id === _id) {
@@ -102,11 +132,59 @@ function VerticalTabs(props) {
   };
   const addContentHundler = pageId => {
     const title = contentTitleRef.current.value,
-      desc = contentTitleRef.current.value;
+      desc = contentDescRef.current.value;
     const file = contentFileRef.current.files[0];
     const closeDialog = () => setPortfolioDialog(false);
     props.addContentHundler(pageId, title, desc, file, closeDialog);
+    contentTitleRef.current.value = '';
+    contentDescRef.current.value = '';
+    contentFileRef.current.value = '';
+    setExpanded(false);
   };
+  const editPageHundler = _id => {
+    for (let i = 0; i < tempPages.length; i++) {
+      if (_id === tempPages[i]._id) {
+        props.editPageHundler(_id, tempPages[i]);
+
+        break;
+      }
+    }
+  };
+  // function hexToRgb(hex) {
+  //   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+  //   return result
+  //     ? {
+  //         r: parseInt(result[1], 16),
+  //         g: parseInt(result[2], 16),
+  //         b: parseInt(result[3], 16)
+  //       }
+  //     : null;
+  // }
+  function hexToRgb(h) {
+    let r = 0,
+      g = 0,
+      b = 0;
+
+    // 3 digits
+    if (h.length == 4) {
+      r = h[1] + h[1];
+      g = h[2] + h[2];
+      b = h[3] + h[3];
+
+      // 6 digits
+    } else if (h.length == 7) {
+      r = h[1] + h[2];
+      g = h[3] + h[4];
+      b = h[5] + h[6];
+    }
+    console.log(r, g, b);
+    return {
+      r: r,
+      g: g,
+      b: b
+    };
+  }
   return (
     <div className={classes.verticalTabs}>
       <Tabs
@@ -145,7 +223,7 @@ function VerticalTabs(props) {
                 className={classes.textField}
                 margin="normal"
                 onChange={e => {
-                  hundelPageInputEdit({ title: e.target.value });
+                  hundelPageInputEdit({ title: e.target.value }, p._id);
                 }}
                 InputProps={{
                   readOnly: !editable
@@ -182,14 +260,102 @@ function VerticalTabs(props) {
                 margin="normal"
                 fullWidth
                 onChange={e => {
-                  hundelPageInputEdit({ desc: e.target.value });
+                  hundelPageInputEdit({ desc: e.target.value }, p._id);
                 }}
                 InputProps={{
                   readOnly: !editable
                 }}
               />
             </div>
-            <div>{el.bg}</div>
+            <div>
+              {el.style.bg.type === 'color' ? (
+                <div
+                  style={{
+                    textAlign: 'center',
+                    maxWidth: '100px',
+                    cursor: 'pointer',
+                    padding: '8px 16px',
+                    border: '3px solid #ccc',
+                    backgroundColor: bg || el.style.bg.val,
+                    position: 'relative',
+                    color:
+                      hexToRgb(bg || el.style.bg.val).r +
+                        hexToRgb(bg || el.style.bg.val).g +
+                        hexToRgb(bg || el.style.bg.val).b <
+                      (256 + 256 + 256) / 2
+                        ? '#fff'
+                        : '#000'
+                  }}
+                  onClick={_ => {
+                    if (editable) setColorChange(true);
+                  }}
+                >
+                  <div>{el.style.bg.val}</div>
+                  {colorChange ? (
+                    <div
+                      style={{
+                        width: '250px',
+                        position: 'absolute',
+                        zIndex: 12
+                      }}
+                      ref={wrapperRef}
+                    >
+                      <SketchPicker
+                        disableAlpha={false}
+                        color={bg ? bg : el.style.bg.val}
+                        onChange={e => {
+                          hundelPageInputEdit(
+                            {
+                              bg: e.hex
+                            },
+                            p._id
+                          );
+                          setBg(e.hex);
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              ) : el.style.bg.type === 'image' ? (
+                <Card className={classes.card}>
+                  <input
+                    type="file"
+                    style={{ display: 'none' }}
+                    ref={bgChangeInputFileRef}
+                    onChange={_ => {
+                      hundelPageInputEdit(
+                        {
+                          bg: _.target.files[0]
+                        },
+                        p._id
+                      );
+                      setNewBg(createUrl(_.target.files[0]));
+                    }}
+                  />
+                  <CardMedia
+                    className={classes.media}
+                    image={newBg || el.style.bg.val || placeholderTestUrl}
+                  />
+                  {editable ? (
+                    <IconButton
+                      className={classes.absTR}
+                      onClick={_ => {
+                        bgChangeInputFileRef.current.click();
+                      }}
+                      aria-label="settings"
+                    >
+                      <FontAwesomeIcon
+                        icon={faPen}
+                        style={{
+                          fontSize: '18px',
+                          color: '#fff'
+                        }}
+                      />
+                    </IconButton>
+                  ) : null}
+                </Card>
+              ) : null}
+            </div>
             <div>
               {el.style.template === 'template3' ? (
                 <div className={classes.flexWrap}>
@@ -306,7 +472,7 @@ function VerticalTabs(props) {
                             InputProps={{
                               readOnly: !editable
                             }}
-                          />{' '}
+                          />
                           <TextField
                             id="standard-read-only-input"
                             label="Description"
@@ -318,10 +484,14 @@ function VerticalTabs(props) {
                               readOnly: !editable
                             }}
                           />
-                          <img height={100} src={el.img} alt={el.title} />
+                          {el.img ? (
+                            <img height={100} src={el.img} alt={el.title} />
+                          ) : null}
                         </div>
                         <Button
-                          onClick={_ => removeContentItem(el.id)}
+                          onClick={_ =>
+                            props.removeContentHundler(p._id, el._id)
+                          }
                           variant="contained"
                           color="secondary"
                           startIcon={<FontAwesomeIcon icon={faTrash} />}
@@ -332,6 +502,67 @@ function VerticalTabs(props) {
                     </ExpansionPanel>
                   );
                 })
+              ) : null}
+              {el.style.template === 'template2' ? (
+                <ExpansionPanel
+                  expanded={expanded}
+                  onChange={_ => setExpanded(!expanded)}
+                >
+                  <ExpansionPanelSummary
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                    expandIcon={<FontAwesomeIcon icon={faPlusSquare} />}
+                  >
+                    <Typography className={classes.heading}>
+                      Add new content
+                    </Typography>
+                  </ExpansionPanelSummary>
+                  <ExpansionPanelDetails className={classes.flexColumn}>
+                    <TextField
+                      inputRef={contentTitleRef}
+                      id="standard-name"
+                      label="Title"
+                      className={classes.textField}
+                      margin="normal"
+                      defaultValue=""
+                    />
+                    <TextField
+                      inputRef={contentDescRef}
+                      defaultValue=""
+                      id="standard-multiline-static"
+                      label="Description"
+                      multiline
+                      rows="4"
+                      className={classes.textField}
+                      margin="normal"
+                    />
+                    {'Image:'}
+                    <input
+                      accept="image/png, image/jpeg"
+                      ref={contentFileRef}
+                      type="file"
+                    />
+                    <div style={{ marginTop: '15px' }}>
+                      <Button
+                        onClick={_ => addContentHundler(p._id)}
+                        style={{ marginRight: '15px' }}
+                        variant="contained"
+                        color="primary"
+                        startIcon={<FontAwesomeIcon icon={faSave} />}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        onClick={_ => setExpanded(false)}
+                        variant="contained"
+                        color="secondary"
+                        startIcon={<FontAwesomeIcon icon={faTrash} />}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </ExpansionPanelDetails>
+                </ExpansionPanel>
               ) : null}
               {el.style.template === 'template3' ? (
                 <div className={classes.flexWrap}></div>
@@ -347,7 +578,7 @@ function VerticalTabs(props) {
                   aria-label="Edit"
                   onClick={() => {
                     if (editable) {
-                      props.editPageHundler(p._id, editPageInfo);
+                      editPageHundler(p._id);
                     }
                     setEditable(!editable);
                   }}
@@ -440,6 +671,8 @@ const Pages = () => {
             const temp = pages.data;
             temp[i] = data.data;
             setPages({ count: pages.count, data: temp });
+            setMessage({ type: 'success', text: data.message, open: true });
+
             break;
           }
         }
@@ -475,6 +708,7 @@ const Pages = () => {
             const temp = pages.data;
             temp[i] = data.data;
             setPages({ count: pages.count, data: temp });
+            setMessage({ type: 'success', text: data.message, open: true });
             break;
           }
         }
@@ -502,6 +736,7 @@ const Pages = () => {
       .then(_ => _.json())
       .then(data => {
         setLoading(false);
+        setMessage({ type: 'success', text: data.message, open: true });
         getPages();
       })
       .catch(err => {
@@ -517,7 +752,19 @@ const Pages = () => {
       });
   };
   const editPageHundler = (pageId, payload) => {
-    console.log(pageId, payload);
+    setLoading(true);
+    console.log(payload);
+    const formData = new FormData();
+    if (payload.title) formData.append('title', payload.title);
+    if (payload.title) formData.append('desc', payload.desc);
+    if (payload.bg) {
+      formData.append('bg', payload.bg);
+    }
+
+    fetch(`${process.env.SERVER}/api/editPage`, {
+      method: 'POST',
+      body: formData
+    });
   };
   const [route, setRoute] = React.useState('');
   return (

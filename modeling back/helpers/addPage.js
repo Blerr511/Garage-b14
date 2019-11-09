@@ -12,7 +12,7 @@ module.exports = (req, res) => {
     if (req.files)
       for (let i = 0; i < req.files.length; i++) {
         if (req.files[i].fieldname === 'bg') {
-          (files.bg = appRoot + '\\' + req.files[i].path).replace(/\\/g, '/');
+          files.bg = (appRoot + '\\' + req.files[i].path).replace(/\\/g, '/');
         } else if (req.files[i].fieldname === 'contentFile') {
           files.content.push(
             (appRoot + '\\' + req.files[i].path).replace(/\\/g, '/')
@@ -46,7 +46,7 @@ module.exports = (req, res) => {
       style: {
         template: template,
         bg: {
-          val: files.bg,
+          val: files.bg ? files.bg : req.body.bg,
           type: bgtype
         },
         titlePosition: titlePosition
