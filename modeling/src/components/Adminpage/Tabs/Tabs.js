@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import SwipeableViews from 'react-swipeable-views';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { useTheme } from '@material-ui/core/styles';
 import RootRef from '@material-ui/core/RootRef';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
@@ -17,7 +17,6 @@ import FormLabel from '@material-ui/core/FormLabel';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -31,16 +30,22 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import IconButton from '@material-ui/core/IconButton';
 
+import Message from '../Message/Message';
 import Demo from '../Demo/Demo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSave,
   faTrash,
-  faPlusSquare
+  faPlusSquare,
+  faTimesCircle
 } from '@fortawesome/free-solid-svg-icons';
 import { SketchPicker } from 'react-color';
+import { styles } from '../../../styles/main';
 
+import { createUrl, placeholderTestUrl } from '../../../methods/createUrl';
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -71,48 +76,12 @@ function a11yProps(index) {
   };
 }
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    backgroundColor: theme.palette.background.paper,
-    width: '100%',
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gridTemplateRows: 'auto'
-  },
-  formControl: {
-    margin: '15px 0'
-  },
-  flexColumn: {
-    display: 'flex',
-    flexDirection: 'column'
-  },
-  heading: {
-    fontSize: theme.typography.pxToRem(15),
-    fontWeight: theme.typography.fontWeightRegular
-  },
-  media: {
-    width: '175px',
-    height: '175px'
-  },
-  card: {
-    width: '175px',
-    height: '175px',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    cursor: 'pointer'
-  },
-  selectInput: {
-    minWidth: '100px',
-    margin: '15px 0'
-  }
-}));
+const useStyles = styles;
 const toBase64 = file =>
   new Promise((resolve, reject) => {
     if (file instanceof File) {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      console.log(file);
       reader.onload = () => resolve(reader.result);
       reader.onerror = error => reject(error);
     } else {
@@ -128,59 +97,14 @@ const FileListToArray = fl => {
   }
   return arr;
 };
-const savePage = async _ => {
-  const { title, desc, titlePosition, bg, bgtype, template, content } = _;
-  const _bg =
-    bgtype === 'color'
-      ? bg.hex
-      : bgtype === 'image'
-      ? await toBase64(bg.image)
-      : bgtype === 'video'
-      ? await toBase64(bg.video)
-      : null;
-  const _content = content.slice();
-  for (let i = 0; i < _content.length; i++) {
-    const el = _content[i];
 
-    if (!(el.img instanceof Array)) {
-      el.img = await toBase64(el.img);
-    } else {
-      const temp = [];
-      for (let i = 0; i < el.img.length; i++) {
-        const elem = el.img[i];
-        const temp1 = await toBase64(elem);
-        temp.push(temp1);
-      }
-      el.img = temp;
-    }
-  }
-
-  const jsonData = {
-    title: title,
-    titlePosition: titlePosition,
-    desc: desc,
-    bg: _bg,
-    bgtype: bgtype,
-    template: template,
-    content: _content
-  };
-  const apiURL = process.env.SERVER;
-  fetch(`${process.env.SERVER}/api/addpage`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(jsonData)
-  })
-    .then(_ => _.json())
-    .then(data => {
-      console.log(data);
-    })
-    .catch(err => {
-      console.log(err);
-    });
-};
 export default function FullWidthTabs(props) {
+  const contentFileRef = useRef();
+  const contentTitleRef = useRef();
+  const contentDescRef = useRef();
+  const titleRef = useRef();
+  const descRef = useRef();
+
   const classes = useStyles();
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
@@ -206,19 +130,97 @@ export default function FullWidthTabs(props) {
   const [expanded, setExpanded] = React.useState(false);
   const [content, setContent] = React.useState([]);
   const [portfolio, setPortfolio] = React.useState([]);
-
+  const [demoUrl, setDemoUrl] = React.useState('');
+  const [message, setMessage] = React.useState({
+    type: 'success',
+    message: '',
+    open: false
+  });
   const tempPortfolio = {
     author: '',
     tags: '',
-    comments: '',
     img: null
   };
+  const [loading, setLoading] = React.useState(false);
   const [portfolioDialog, setPortfolioDialog] = React.useState(false);
 
+  const savePage = async _ => {
+    if (!loading) {
+      const { title, desc, titlePosition, bg, bgtype, template, content } = _;
+
+      setLoading(true);
+      const _bg =
+        bgtype === 'color'
+          ? bg.hex
+          : bgtype === 'image'
+          ? bg.image
+          : bgtype === 'video'
+          ? bg.video
+          : null;
+
+      const jsonData = {
+        title: title,
+        titlePosition: titlePosition,
+        desc: desc,
+        bg: _bg,
+        bgtype: bgtype,
+        template: template,
+        content: content
+      };
+      Object.defineProperties(jsonData, {
+        content: {
+          enumerable: false
+        }
+      });
+      const formData = new FormData();
+      for (const k in jsonData) {
+        if (jsonData.hasOwnProperty(k)) {
+          const val = jsonData[k];
+          formData.append(k, val);
+        }
+      }
+      content.map(el => {
+        console.log(el);
+        if (el.title !== undefined) formData.append('contentTitle', el.title);
+        if (el.desc !== undefined) formData.append('contentDesc', el.desc);
+        if (el.img !== undefined) formData.append('contentFile', el.img);
+      });
+      const apiURL = process.env.SERVER;
+      fetch(`${apiURL}/api/addpage`, {
+        method: 'POST',
+        body: formData
+      })
+        .then(_ => _.json())
+        .then(data => {
+          setLoading(false);
+
+          if (+data.status !== 200) throw data;
+
+          setMessage({ type: 'success', text: data.message, open: true });
+          clear();
+          setDemoUrl(data.route);
+        })
+        .catch(err => {
+          setLoading(false);
+
+          if (err)
+            var text =
+              typeof err === 'string'
+                ? err
+                : typeof err.message === 'string'
+                ? err.message
+                : 'Somthing goes wrong .';
+          else var text = 'Somthing  goes wrong .';
+          setMessage({ type: 'error', text: text, open: true });
+        });
+    }
+  };
   const clear = _ => {
     setTitle('');
     setDesc('');
-
+    setDemoUrl('');
+    titleRef.current.value = '';
+    descRef.current.value = '';
     Object.assign(newContent, {
       title: '',
       desc: '',
@@ -227,7 +229,6 @@ export default function FullWidthTabs(props) {
     Object.assign(tempPortfolio, {
       author: '',
       tags: '',
-      comments: '',
       img: null
     });
     setbgtype('color');
@@ -285,36 +286,66 @@ export default function FullWidthTabs(props) {
         img: newContent.img
       })
     );
+
+    Object.assign(newContent, {
+      title: '',
+      desc: '',
+      img: null
+    });
+    contentDescRef.current.value = '';
+    contentTitleRef.current.value = '';
+    contentFileRef.current.value = '';
     setExpanded(false);
   };
   const portfolioItemChangeHundler = _ => {
     Object.assign(tempPortfolio, _);
   };
+  const closeMessage = () => {
+    setMessage({ type: 'success', message: '', open: false });
+  };
+  const removeContentItem = _ => {
+    for (let i = 0; i < content.length; i++) {
+      const e = content[i];
+      if (e.id === _) {
+        const temp = content.slice();
+        temp.splice(i, 1);
+        setContent(temp);
+        break;
+      }
+    }
+  };
   const removePortfolioItem = _ => {
     for (let i = 0; i < portfolio.length; i++) {
-      if (JSON.stringify(portfolio[i]) === JSON.stringify(_)) {
-        const temp = portfolio[i];
+      const e = portfolio[i];
+      if (e.id === _) {
+        const temp = portfolio.slice();
         temp.splice(i, 1);
+        console.log(temp);
         setPortfolio(temp);
+        break;
       }
     }
   };
   const addNewPortfolio = _ => {
-    setPortfolio(
-      portfolio.concat({ ...tempPortfolio, id: tempPortfolio.length })
-    );
+    setPortfolio(portfolio.concat({ ...tempPortfolio, id: portfolio.length }));
     Object.assign(tempPortfolio, {
       author: '',
       tags: '',
-      comments: '',
       img: null
     });
     setPortfolioDialog(false);
   };
 
   return (
-    <div className={classes.root}>
+    <div className={classes.addPages}>
       <div>
+        <Message
+          open={message.open}
+          type={message.type}
+          handleclose={closeMessage}
+          timer={3000}
+          message={message.text}
+        />
         <AppBar position="static" color="default">
           <Tabs
             value={value}
@@ -324,12 +355,23 @@ export default function FullWidthTabs(props) {
             variant="fullWidth"
             aria-label="full width tabs example"
           >
-            {props.pages.map(el => (
-              <Tab key={el._id} label={el.title} />
-            ))}
             <Tab label="Add page" />
           </Tabs>
         </AppBar>
+        {loading ? (
+          <div
+            style={{
+              position: 'fixed',
+              top: '0',
+              left: '0',
+              width: '100%',
+              height: '10px'
+            }}
+          >
+            {' '}
+            <LinearProgress color="secondary" variant="query" />
+          </div>
+        ) : null}{' '}
         <SwipeableViews
           axis={theme.direction === 'rtl' ? 'x-reverse' : 'x'}
           index={value}
@@ -345,8 +387,9 @@ export default function FullWidthTabs(props) {
                   id="standard-name"
                   label="Title"
                   className={classes.textField}
-                  onChange={_ => setTitle(_.target.value)}
+                  onBlur={_ => setTitle(_.target.value)}
                   margin="normal"
+                  inputRef={titleRef}
                 />
                 <FormControl className={classes.selectInput}>
                   <InputLabel htmlFor="age-simple">Title position</InputLabel>
@@ -365,7 +408,8 @@ export default function FullWidthTabs(props) {
                 label="Description"
                 multiline
                 rows="4"
-                onChange={_ => setDesc(_.target.value)}
+                inputRef={descRef}
+                onBlur={_ => setDesc(_.target.value)}
                 className={classes.textField}
                 margin="normal"
               />
@@ -442,6 +486,7 @@ export default function FullWidthTabs(props) {
                 </div>
               ) : bgtype === 'image' ? (
                 <input
+                  accept="image/png, image/jpeg"
                   type="file"
                   onChange={e => setBg({ ...bg, image: e.target.files[0] })}
                   style={{ minHeight: '46px' }}
@@ -501,10 +546,18 @@ export default function FullWidthTabs(props) {
                             <Typography>{el.desc}</Typography>
                             <img
                               height={100}
-                              src={URL.createObjectURL(el.img)}
+                              src={createUrl(el.img)}
                               alt={el.title}
                             />
                           </div>
+                          <Button
+                            onClick={_ => removeContentItem(el.id)}
+                            variant="contained"
+                            color="secondary"
+                            startIcon={<FontAwesomeIcon icon={faTrash} />}
+                          >
+                            Delete
+                          </Button>
                         </ExpansionPanelDetails>
                       </ExpansionPanel>
                     );
@@ -526,20 +579,22 @@ export default function FullWidthTabs(props) {
                   </ExpansionPanelSummary>
                   <ExpansionPanelDetails className={classes.flexColumn}>
                     <TextField
+                      inputRef={contentTitleRef}
                       id="standard-name"
                       label="Title"
                       className={classes.textField}
-                      value={content.title}
                       margin="normal"
+                      defaultValue=""
                       onChange={_ =>
                         contentChangeHundler({ title: _.target.value })
                       }
                     />
                     <TextField
+                      inputRef={contentDescRef}
                       onChange={_ =>
                         contentChangeHundler({ desc: _.target.value })
                       }
-                      value={content.desc}
+                      defaultValue=""
                       id="standard-multiline-static"
                       label="Description"
                       multiline
@@ -547,9 +602,10 @@ export default function FullWidthTabs(props) {
                       className={classes.textField}
                       margin="normal"
                     />
-
                     {'Image:'}
                     <input
+                      accept="image/png, image/jpeg"
+                      ref={contentFileRef}
                       type="file"
                       onChange={_ => {
                         contentChangeHundler({
@@ -582,25 +638,29 @@ export default function FullWidthTabs(props) {
               <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                 {template === 'template3'
                   ? portfolio.map(el => {
-                      const cards = [];
-                      for (const k in el.img) {
-                        if (!isNaN(parseInt(k))) {
-                          cards.push(el.img[k]);
-                        }
-                      }
-
+                      const element = el;
                       return (
                         <div key={Math.random()}>
-                          {cards.map(el => {
-                            return (
-                              <Card key={el} className={classes.card}>
-                                <CardMedia
-                                  className={classes.media}
-                                  image={URL.createObjectURL(el)}
-                                />
-                              </Card>
-                            );
-                          })}
+                          <Card key={el.img} className={classes.card}>
+                            <CardMedia
+                              className={classes.media}
+                              image={createUrl(el.img)}
+                            />{' '}
+                            <IconButton
+                              className={classes.absTR}
+                              aria-label="settings"
+                              onClick={_ => removePortfolioItem(element.id)}
+                            >
+                              <FontAwesomeIcon
+                                icon={faTimesCircle}
+                                style={{
+                                  fontSize: '20px',
+                                  color: '#fff'
+                                }}
+                              />
+                            </IconButton>
+                          </Card>
+                          );
                         </div>
                       );
                     })
@@ -636,7 +696,7 @@ export default function FullWidthTabs(props) {
                       label="Author"
                       type="text"
                       onChange={_ =>
-                        portfolioItemChangeHundler({ author: _.target.value })
+                        portfolioItemChangeHundler({ title: _.target.value })
                       }
                     />{' '}
                     <TextField
@@ -644,23 +704,15 @@ export default function FullWidthTabs(props) {
                       label="Tags"
                       type="text"
                       onChange={_ =>
-                        portfolioItemChangeHundler({ tags: _.target.value })
-                      }
-                    />
-                    <TextField
-                      margin="dense"
-                      id="name"
-                      label="Comments"
-                      type="text"
-                      onChange={_ =>
-                        portfolioItemChangeHundler({ comments: _.target.value })
+                        portfolioItemChangeHundler({ desc: _.target.value })
                       }
                     />
                     <input
+                      accept="image/png, image/jpeg"
                       type="file"
                       onChange={_ =>
                         portfolioItemChangeHundler({
-                          img: FileListToArray(_.target.files)
+                          img: _.target.files[0]
                         })
                       }
                     />
@@ -708,7 +760,7 @@ export default function FullWidthTabs(props) {
         </SwipeableViews>
       </div>
       <div>
-        <Demo />
+        <Demo route={demoUrl} />
       </div>
     </div>
   );

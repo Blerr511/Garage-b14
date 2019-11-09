@@ -5,9 +5,12 @@ const http = require('http'),
   cookieParser = require('cookie-parser'),
   dotenv = require('dotenv'),
   multer = require('multer'),
-  path = require('path');
-global.appRoot = path.resolve(__dirname);
+  path = require('path'),
+  os = require('os');
 dotenv.config();
+global.appRoot =
+  process.env.PROTOCOL + os.hostname() + ':' + (process.env.PORT || 8080);
+global.appDir = __dirname;
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
     cb(null, './uploads/');
@@ -44,15 +47,19 @@ const decodeJWT = require('./helpers/decodeJWT'),
   editServices = require('./helpers/pages/services').editService,
   portfolio = require('./helpers/pages/portfolio'),
   getPages = require('./helpers/pages/get'),
-  addPages = require('./helpers/addPage');
+  addPages = require('./helpers/addPage'),
+  removePage = require('./helpers/addPage').removePage,
+  addContent = require('./helpers/contentHundlers').add,
+  removeContent = require('./helpers/contentHundlers').remove;
 const upload = multer({ storage: storage });
 
 const app = express();
+
 const server = http.Server(app);
 const corsOptions = {
   origin: process.env.CLIENT,
   credentials: true,
-  allowedHeaders: ['Content-Type']
+  allowedHeaders: ['Content-Type', 'access-control-allow-credentials']
 };
 app.use(cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -101,8 +108,11 @@ app.get('/api/portfolio', portfolio.get);
 app.post('/api/portfolio', upload.single('bg'), portfolio.set);
 app.put('/api/portfolio', upload.single('img'), portfolio.add);
 
-app.post('/api/addpage', addPages);
+app.post('/api/addpage', upload.any(), addPages);
 app.get('/api/get', getPages);
+app.post('/api/addContent', upload.single('file'), addContent);
+app.post('/api/removeContent', upload.none(), removeContent);
+app.post('/api/removePage',upload.none(),removePage)
 server.listen(process.env.PORT || 8080, () =>
   console.log(`app listen ${process.env.PORT || 8080}`)
 );

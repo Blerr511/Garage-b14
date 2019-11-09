@@ -29,21 +29,13 @@ const UserSchema = new Schema({
 const User = new mongoose.model('User', UserSchema);
 
 const page = new Schema({
-  title: { type: String, required: true, default: 'title' },
-  titlePosition: { type: String, default: 'left' },
+  title: { type: String },
+  style: {
+    type: mongoose.SchemaTypes.Mixed
+  },
   desc: { type: String, required: false },
-  template: { type: String, required: true },
-  bg: {
-    type: String,
-    required: true,
-    default: '#000'
-  },
-  bgtype: {
-    type: String,
-    required: true,
-    default: 'color'
-  },
-  content: { type: mongoose.SchemaTypes.Mixed, required: false, default: null }
+  content: { type: mongoose.SchemaTypes.Mixed, required: false, default: null },
+  route: { type: String }
 });
 const Page = new mongoose.model('Page', page);
 
@@ -57,10 +49,8 @@ const Service = new mongoose.model('Service', serviceSchema);
 
 const portfolioSchema = new Schema({
   title: String,
-  author: String,
   tags: [String],
-  img: String,
-  other: String
+  img: String
 });
 const Portfolio = new mongoose.model('Portfolio', portfolioSchema);
 

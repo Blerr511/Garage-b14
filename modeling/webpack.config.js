@@ -10,7 +10,8 @@ module.exports = env => {
     entry: './src/index.js',
     output: {
       path: path.join(__dirname, '/dist'),
-      filename: 'index_bundle.js'
+      filename: 'index_bundle.js',
+      publicPath: '/'
     },
     module: {
       rules: [
@@ -43,8 +44,10 @@ module.exports = env => {
         template: './public/index.html'
       }),
       new webpack.DefinePlugin({
-        'process.env.PORT': dotenv.parsed.PORT,
-        'process.env.HOST': dotenv.parsed.HOST
+        'process.env.PORT': JSON.stringify(dotenv.parsed.PORT),
+        'process.env.HOST': JSON.stringify(dotenv.parsed.HOST),
+        'process.env.SERVER':
+          JSON.stringify(dotenv.parsed.SERVER) || 'http://localhost:8080'
       }),
       new ErrorOverlayPlugin(),
       new CopyWebpackPlugin([{ from: 'src/assets', to: 'assets' }])

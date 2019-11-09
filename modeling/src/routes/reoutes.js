@@ -7,6 +7,7 @@ import Portfolio from '../components/Portfolio/Portfolio';
 import About from '../components/About/About';
 import Contactus from '../components/Contactus/Contactus';
 import Partners from '../components/Partners/Partners';
+import Adminpage from '../components/Adminpage/Adminpage';
 export const routes = [
   {
     route: '/',
