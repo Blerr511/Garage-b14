@@ -1,0 +1,10 @@
+.notFound {
+  background-image: url('../../assets/img/2663519.png');
+  background-size: cover !important;
+  background-position: center;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

@@ -9,13 +9,17 @@
   display: grid;
   grid-template-columns: 1fr 2fr;
   grid-template-rows: auto;
-  z-index: 10;
+  z-index: 13;
   ul {
     display: flex;
     justify-content: flex-end;
     padding-top: 20px;
     li {
+      button,
       a {
+        border: none;
+        background: transparent;
+        outline: none;
         color: #fff;
         font-size: 18px;
         padding: 8px 12px;
@@ -23,11 +27,11 @@
         border-radius: 2px;
         transition-duration: 0.5s;
         white-space: nowrap;
+        cursor: pointer;
       }
-      a:hover,
-      .active {
-        background-color: @activeLinkColor;
-        color: black;
+      #services {
+        background-color: @activeLinkColor!important;
+        color: black !important;
       }
     }
   }

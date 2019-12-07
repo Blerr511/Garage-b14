@@ -36,6 +36,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  -moz-transform: none;
+  -webkit-transform: none;
+  -o-transform: none;
+  -ms-transform: none;
+  transform: none !important;
 }
 .mainPage .verticalBar > div {
   display: flex;
@@ -44,5 +49,18 @@
   justify-content: center;
 }
 .mainPage .verticalBar > div a {
+  margin: 5px 0;
+  width: 30px;
+  height: 30px;
+  display: block;
+  background: url(../../assets/img//dot.png);
+  background-size: cover;
+}
+.mainPage .verticalBar > div .active {
+  background: url(../../assets/img//dotActive.png) !important;
+  background-size: cover !important;
+}
+.mainPage .verticalBar > div img {
+  cursor: pointer;
   margin: 5px 0;
 }

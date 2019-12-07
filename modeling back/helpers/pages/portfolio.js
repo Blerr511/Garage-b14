@@ -8,7 +8,7 @@ module.exports.delete = async (req, res) => {
     const element = tempPage.content[i];
     if (element._id.toString() === _id) {
       fs.unlink(element.img, err => {
-        if (err) console.log(err);
+        if (err) console.error(err);
       });
       break;
     }
@@ -81,7 +81,7 @@ module.exports.set = async (req, res) => {
     if (bg) {
       if (req.file) {
         fs.unlink(page.bg, err => {
-          if (err) console.log(err);
+          if (err) console.error(err);
         });
       }
       page.bg = bg;

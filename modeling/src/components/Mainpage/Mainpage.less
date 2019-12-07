@@ -36,12 +36,31 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    -moz-transform: none;
+    -webkit-transform: none;
+    -o-transform: none;
+    -ms-transform: none;
+    transform: none !important;
     > div {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       a {
+        margin: 5px 0;
+        width: 30px;
+        height: 30px;
+        display: block;
+        background: url(../../assets/img//dot.png);
+        background-size: cover;
+      }
+
+      .active {
+        background: url(../../assets/img//dotActive.png) !important;
+        background-size: cover !important;
+      }
+      img {
+        cursor: pointer;
         margin: 5px 0;
       }
     }

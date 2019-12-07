@@ -46,6 +46,7 @@ module.exports = env => {
       new webpack.DefinePlugin({
         'process.env.PORT': JSON.stringify(dotenv.parsed.PORT),
         'process.env.HOST': JSON.stringify(dotenv.parsed.HOST),
+        'process.env.TINYAPIKEY': JSON.stringify(dotenv.parsed.TINYAPIKEY),
         'process.env.SERVER':
           JSON.stringify(dotenv.parsed.SERVER) || 'http://localhost:8080'
       }),

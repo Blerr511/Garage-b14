@@ -1,34 +1,46 @@
 import React from 'react';
 import Gallery from 'react-grid-gallery';
 
-import Soclinks from '../Soclinks/Soclinks';
-
-import { test } from '../../test';
-
+import ReactHtmlParser from 'react-html-parser';
 import './Portfolio.less';
 
-const Portfolio = () => {
+const Portfolio = _ => {
+  const { desc, content, style } = _.params;
+  const [page, setPage] = React.useState(0);
+  const temp = content.slice(page * 30, page * 30 + 30);
+  const images = temp.map(el => {
+    const img = new Image();
+    img.src = el.img;
+    return {
+      src: el.img,
+      caption: el.title,
+      thumbnail: el.img,
+      thumbnailHeight: img.height / 10,
+      thumbnailWidth: img.width / 10,
+      tags: el.desc
+        ? el.desc.split(' ').map(el => ({ value: el, title: el }))
+        : []
+    };
+  });
+
   return (
     <div
       className="portfolio"
-      style={{ backgroundImage: `url(${test.portfolio.bg})` }}
+      style={{
+        background:
+          style.bg.type === 'color'
+            ? style.bg.val
+            : style.bg.type === 'image'`url(${style.bg.val})`
+      }}
     >
-      <div>
-        <div>
-          {[0, 1, 2, 3].map(el => (
-            <section key={`reactGridGalarey${el}`}>
-              <Gallery
-                id={`reactGridGalarey${el}`}
-                enableImageSelection={false}
-                backdropClosesModal={true}
-                images={test.portfolio.photos}
-              />
-            </section>
-          ))}
-        </div>
-        <div>
-          <Soclinks style={{ left: '0' }} />
-        </div>
+      {desc && ReactHtmlParser(desc)}
+      <div style={{ maxWidth: '100%' }}>
+        <Gallery
+          id={`reactGridGalarey`}
+          enableImageSelection={false}
+          backdropClosesModal={true}
+          images={images}
+        />
       </div>
     </div>
   );

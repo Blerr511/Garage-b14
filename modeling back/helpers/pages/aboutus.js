@@ -3,7 +3,8 @@ const Page = require('../../mongoose/Schemas').Page;
 module.exports.set = async (req, res) => {
   const page = await Page.findOne({ type: 'aboutus' });
   const { title, desc } = req.body;
-  const path = appRoot + '\\' + req.file?req.file.path:'/uploads/placeholder.jpg';
+  const path =
+    appRoot + '\\' + req.file ? req.file.path : '/uploads/placeholder.jpg';
   if (!page) {
     const page = new Page({
       title: title,
@@ -13,11 +14,11 @@ module.exports.set = async (req, res) => {
     });
     page.save(err => {
       if (!err) res.send(page);
-      else console.log(err);
+      else console.error(err);
     });
   } else {
     fs.unlink(page.bg, err => {
-      if (err) console.log(err);
+      if (err) console.error(err);
     });
     page.title = title;
     page.bg = path;

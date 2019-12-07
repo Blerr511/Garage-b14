@@ -10,6 +10,7 @@ import {
   faWarehouse,
   faInfo,
   faCameraRetro,
+  faExclamationCircle,
   faTimes
 } from '@fortawesome/free-solid-svg-icons';
 import { styles } from '../../../styles/main';
@@ -17,17 +18,14 @@ import { styles } from '../../../styles/main';
 const variantIcon = {
   success: faCheckCircle,
   warning: faWarehouse,
-  error: faCameraRetro,
+  error: faExclamationCircle,
   info: faInfo
 };
 
-const useStyles1 = styles;
-
 function MySnackbarContentWrapper(props) {
-  const classes = useStyles1();
+  const classes = styles();
   const { className, message, onClose, variant, ...other } = props;
   const Icon = _ => <FontAwesomeIcon {..._} icon={variantIcon[variant]} />;
-
   return (
     <SnackbarContent
       className={clsx(classes[variant], className)}
@@ -77,7 +75,7 @@ export default function Message(props) {
     let timeout = null;
 
     if (timer) {
-      timeout = setTimeout(handleClose, timer?timer:3000);
+      timeout = setTimeout(handleClose, timer ? timer : 3000);
     }
     return () => {
       clearTimeout(timeout);

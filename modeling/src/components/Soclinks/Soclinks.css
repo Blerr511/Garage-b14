@@ -1,7 +1,8 @@
 .soclinks {
-  position: absolute;
+  position: fixed;
   left: 5%;
   bottom: 5%;
+  z-index: 10;
 }
 .soclinks span,
 .soclinks a {

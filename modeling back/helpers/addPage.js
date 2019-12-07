@@ -1,18 +1,20 @@
 const { Page, Service } = require('../mongoose/Schemas');
 const fs = require('fs');
 const clgErr = err => {
-  if (err) console.log(err);
+  if (err) console.error(err);
 };
 module.exports = (req, res) => {
-  const { title, titlePosition, desc, template, bgtype } = req.body;
+  const { title, template, desc } = req.body;
+  let bgtype = req.body.bgtype;
   const { contentTitle, contentDesc } = req.body;
-
   const files = { bg: '', content: [] };
+
   try {
     if (req.files)
       for (let i = 0; i < req.files.length; i++) {
         if (req.files[i].fieldname === 'bg') {
           files.bg = (appRoot + '\\' + req.files[i].path).replace(/\\/g, '/');
+          bgtype = req.files[i].mimetype.split('/')[0];
         } else if (req.files[i].fieldname === 'contentFile') {
           files.content.push(
             (appRoot + '\\' + req.files[i].path).replace(/\\/g, '/')
@@ -48,11 +50,9 @@ module.exports = (req, res) => {
         bg: {
           val: files.bg ? files.bg : req.body.bg,
           type: bgtype
-        },
-        titlePosition: titlePosition
+        }
       },
-      content: content,
-      route: route
+      content: content
     });
     page.save(err => {
       if (err) {
@@ -84,16 +84,49 @@ module.exports.removePage = async (req, res) => {
       try {
         doc.content.forEach(el => {
           fs.unlink(el.img.replace(appRoot, appDir), err => {
-            if (err) console.log(err);
-            else console.log('file removed');
+            if (err) console.error(err);
           });
         });
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
   });
   const remove = await Page.deleteOne({ _id: pageId });
-  console.log(remove);
   res.status(200).send({ code: 200, message: 'Page removed' });
+};
+
+module.exports.editPage = async (req, res) => {
+  try {
+    const pageId = req.body.pageId;
+    const updateData = {};
+    const page = await Page.findById(pageId);
+    if (req.body.title) updateData.title = req.body.title;
+    if (req.body.desc) updateData.desc = req.body.desc;
+    if (req.body.bg && page.style.bg.type === 'color')
+      updateData.style = {
+        template: page.style.template,
+        bg: { val: req.body.bg, type: req.body.bgType }
+      };
+    else if (page.style.bg.type === 'image/video' && req.file) {
+      fs.unlink(page.style.bg.val.replace(appRoot, appDir), clgErr);
+      updateData.style = {
+        template: page.style.template,
+        bg: {
+          val: (appRoot + '\\' + req.file.path).replace(/\\/g, '/'),
+          type: req.file.mimetype.split('/')[0]
+        }
+      };
+    }
+    const status = await Page.updateOne({ _id: pageId }, { $set: updateData });
+    if (status.ok != 1) {
+      res.status(400).send({ code: 400, message: 'Somthing goes wrong ' });
+      return false;
+    }
+    res.status(200).send({ code: 200, message: 'Changes saved !' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({ code: 400, message: 'Somthing goes wrong ' });
+    return false;
+  }
 };

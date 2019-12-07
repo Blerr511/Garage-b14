@@ -19,10 +19,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import Select from '@material-ui/core/Select';
-import FormControl from '@material-ui/core/FormControl';
+
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -33,6 +30,7 @@ import Demo from '../Demo/Demo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { SketchPicker } from 'react-color';
 
+import { Editor } from '@tinymce/tinymce-react';
 import {
   faSave,
   faTrash,
@@ -82,15 +80,14 @@ function VerticalTabs(props) {
   const { pages, count } = props;
   const handleChange = (event, newValue) => {
     setValue(newValue);
-    props.setRoute(pages[newValue].route);
+    props.setRoute(pages[newValue].title.replace(/\ /g, '_'));
   };
-  const [page, setPage] = useState(0);
   const [editable, setEditable] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [colorChange, setColorChange] = useState(false);
   const [newBg, setNewBg] = useState(null);
-  const [bg, setBg] = useState('#000');
+  const [bg, setBg] = useState(null);
   const contentTitleRef = useRef();
   const contentDescRef = useRef();
   const contentFileRef = useRef();
@@ -119,13 +116,12 @@ function VerticalTabs(props) {
   }
   const [portfolioDialog, setPortfolioDialog] = useState(false);
 
-  const editPageInfo = {};
-  const tempPages = pages.slice();
+  const tempPages = pages;
 
   const hundelPageInputEdit = (_, _id) => {
     tempPages.map(el => {
       if (el._id === _id) {
-        return Object.assign(el, _);
+        Object.assign(el, _);
       }
       return el;
     });
@@ -144,23 +140,21 @@ function VerticalTabs(props) {
   const editPageHundler = _id => {
     for (let i = 0; i < tempPages.length; i++) {
       if (_id === tempPages[i]._id) {
-        props.editPageHundler(_id, tempPages[i]);
+        setSaveLoading(true);
+        props
+          .editPageHundler(_id, tempPages[i])
+          .then(_ => {
+            setSaveLoading(false);
+            props.setRoute('/');
+            props.setRoute(tempPages[i].title.replace(/\ /g, '_'));
+          })
+          .catch(_ => setSaveLoading(false));
 
         break;
       }
     }
   };
-  // function hexToRgb(hex) {
-  //   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
-  //   return result
-  //     ? {
-  //         r: parseInt(result[1], 16),
-  //         g: parseInt(result[2], 16),
-  //         b: parseInt(result[3], 16)
-  //       }
-  //     : null;
-  // }
   function hexToRgb(h) {
     let r = 0,
       g = 0,
@@ -178,7 +172,6 @@ function VerticalTabs(props) {
       g = h[3] + h[4];
       b = h[5] + h[6];
     }
-    console.log(r, g, b);
     return {
       r: r,
       g: g,
@@ -251,20 +244,36 @@ function VerticalTabs(props) {
               </span>
             </div>
             <div className={classes.pageDesc}>
-              <TextField
-                id="standard-read-only-input"
-                label="Description"
-                multiline
-                defaultValue={el.desc ? el.desc : ''}
-                className={classes.textField}
-                margin="normal"
-                fullWidth
-                onChange={e => {
-                  hundelPageInputEdit({ desc: e.target.value }, p._id);
+              <Editor
+                apiKey={process.env.TINYAPIKEY}
+                initialValue={el.desc}
+                cloudChannel="5-stable"
+                disabled={!editable}
+                id={el._id}
+                init={{
+                  // selector: 'textarea#full-featured',
+                  plugins:
+                    ' preview powerpaste casechange autolink  directionality advcode visualblocks visualchars fullscreen  link  table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists checklist wordcount tinymcespellchecker a11ychecker  textpattern noneditable  formatpainter permanentpen  charmap mentions  linkchecker emoticons',
+                  toolbar:
+                    'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons  |   pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
+                  template_cdate_format:
+                    '[Date Created (CDATE): %m/%d/%Y : %H:%M:%S]',
+                  template_mdate_format:
+                    '[Date Modified (MDATE): %m/%d/%Y : %H:%M:%S]',
+                  height: 250,
+                  quickbars_selection_toolbar:
+                    'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
+                  noneditable_noneditable_class: 'mceNonEditable',
+                  toolbar_drawer: 'sliding',
+                  spellchecker_dialog: true,
+                  spellchecker_whitelist: ['Ephox', 'Moxiecode'],
+                  tinycomments_mode: 'embedded',
+                  menubar: false,
+                  content_style: '.mymention{ color: gray; }',
+                  contextmenu: 'link',
+                  mentions_selector: '.mymention'
                 }}
-                InputProps={{
-                  readOnly: !editable
-                }}
+                inline={false}
               />
             </div>
             <div>
@@ -306,7 +315,8 @@ function VerticalTabs(props) {
                         onChange={e => {
                           hundelPageInputEdit(
                             {
-                              bg: e.hex
+                              bg: e.hex,
+                              type: 'color'
                             },
                             p._id
                           );
@@ -325,7 +335,8 @@ function VerticalTabs(props) {
                     onChange={_ => {
                       hundelPageInputEdit(
                         {
-                          bg: _.target.files[0]
+                          bg: _.target.files[0],
+                          type: 'image'
                         },
                         p._id
                       );
@@ -360,34 +371,6 @@ function VerticalTabs(props) {
               {el.style.template === 'template3' ? (
                 <div className={classes.flexWrap}>
                   {' '}
-                  {el.content.map(el => {
-                    const element = el;
-                    return (
-                      <div key={el._id}>
-                        <Card className={classes.card}>
-                          <CardMedia
-                            className={classes.media}
-                            image={el.img || placeholderTestUrl}
-                          />
-                          <IconButton
-                            className={classes.absTR}
-                            aria-label="settings"
-                            onClick={_ =>
-                              props.removeContentHundler(p._id, el._id)
-                            }
-                          >
-                            <FontAwesomeIcon
-                              icon={faTimesCircle}
-                              style={{
-                                fontSize: '20px',
-                                color: '#fff'
-                              }}
-                            />
-                          </IconButton>
-                        </Card>
-                      </div>
-                    );
-                  })}
                   {portfolioDialog ? (
                     <Dialog
                       open={portfolioDialog}
@@ -582,6 +565,7 @@ function VerticalTabs(props) {
                     }
                     setEditable(!editable);
                   }}
+                  style={{ marginRight: '15px' }}
                   color={editable ? 'inherit' : 'primary'}
                 >
                   <FontAwesomeIcon icon={editable ? faSave : faPen} />
@@ -610,6 +594,7 @@ function VerticalTabs(props) {
 const Pages = () => {
   const classes = useStyles();
   const [pages, setPages] = useState({ count: 0, data: [] });
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({
     type: 'success',
@@ -617,7 +602,7 @@ const Pages = () => {
     open: false
   });
   const closeMessage = () => {
-    setMessage({ type: 'success', message: '', open: false });
+    setMessage({ ...message, open: false });
   };
   const queryParams = {
     page: 1,
@@ -631,6 +616,7 @@ const Pages = () => {
       );
 
       const data = await res.json();
+
       return setPages(data);
     } catch (err) {
       if (err)
@@ -704,7 +690,6 @@ const Pages = () => {
         setLoading(false);
         for (let i = 0; i < pages.data.length; i++) {
           if (data.data._id === pages.data[i]._id) {
-            console.log(data.data);
             const temp = pages.data;
             temp[i] = data.data;
             setPages({ count: pages.count, data: temp });
@@ -751,20 +736,37 @@ const Pages = () => {
         setLoading(false);
       });
   };
-  const editPageHundler = (pageId, payload) => {
-    setLoading(true);
-    console.log(payload);
+  const editPageHundler = async (pageId, payload) => {
     const formData = new FormData();
+    formData.append('pageId', pageId);
     if (payload.title) formData.append('title', payload.title);
-    if (payload.title) formData.append('desc', payload.desc);
+
+    formData.append('desc', window.tinyMCE.get(pageId).getContent());
     if (payload.bg) {
       formData.append('bg', payload.bg);
+      formData.append('bgType', payload.type);
     }
+    try {
+      let data = await fetch(`${process.env.SERVER}/api/editPage`, {
+        method: 'POST',
+        body: formData
+      });
 
-    fetch(`${process.env.SERVER}/api/editPage`, {
-      method: 'POST',
-      body: formData
-    });
+      data = await data.json();
+      setMessage({ type: 'success', text: data.message, open: true });
+      getPages();
+      setLoading(false);
+    } catch (err) {
+      if (err)
+        var text =
+          typeof err === 'string'
+            ? err
+            : typeof err.message === 'string'
+            ? err.message
+            : 'Somthing goes wrong .';
+      setMessage({ type: 'error', text: text, open: true });
+      setLoading(false);
+    }
   };
   const [route, setRoute] = React.useState('');
   return (
@@ -794,7 +796,7 @@ const Pages = () => {
         style={{
           display: 'grid',
           gridTemplateColumns: '1fr 1fr',
-          gridTemplateRows: '100vh'
+          gridTemplateRows: 'auto'
         }}
       >
         <VerticalTabs

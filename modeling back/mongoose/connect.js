@@ -8,9 +8,9 @@ mongoose.connect(
     useCreateIndex: true
   },
   err => {
-    if (err) console.log(err);
+    if (err) console.error(err);
     else {
-      console.log('succesfull connected to db');
+      console.info('succesfull connected to db');
     }
   }
 );

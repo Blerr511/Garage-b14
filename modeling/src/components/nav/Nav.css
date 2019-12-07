@@ -7,14 +7,18 @@
   display: grid;
   grid-template-columns: 1fr 2fr;
   grid-template-rows: auto;
-  z-index: 10;
+  z-index: 13;
 }
 .navbar ul {
   display: flex;
   justify-content: flex-end;
   padding-top: 20px;
 }
+.navbar ul li button,
 .navbar ul li a {
+  border: none;
+  background: transparent;
+  outline: none;
   color: #fff;
   font-size: 18px;
   padding: 8px 12px;
@@ -22,9 +26,9 @@
   border-radius: 2px;
   transition-duration: 0.5s;
   white-space: nowrap;
+  cursor: pointer;
 }
-.navbar ul li a:hover,
-.navbar ul li .active {
-  background-color: #ffe15f;
-  color: black;
+.navbar ul li #services {
+  background-color: #ffe15f !important;
+  color: black !important;
 }

@@ -1,13 +1,23 @@
 import React from 'react';
-import { NavLink, Link, BrowserRouter as Router } from 'react-router-dom';
-
-import { routes } from '../../routes/reoutes';
+import { NavLink, Link, withRouter } from 'react-router-dom';
 
 import './Nav.less';
 import logo from '../../assets/img/logo_header.png';
-const Nav = () => {
+const Nav = props => {
+  const [state] = React.useState(
+    props.routes.map(el => el.route).concat(['/', '/main', '/:path'])
+  );
+  console.log(props.routes);
   return (
-    <nav className="navbar">
+    <nav
+      className="navbar"
+      style={{
+        background:
+          state.indexOf(props.location.pathname) === -1
+            ? 'black'
+            : 'transparent'
+      }}
+    >
       <section>
         <div id="logo">
           <Link to="/">
@@ -17,11 +27,15 @@ const Nav = () => {
       </section>
       <section>
         <ul>
-          {routes.map(el => {
+          {props.routes.map(el => {
             if (el.navLink) {
               return (
                 <li key={el.route}>
-                  <NavLink exact to={el.route}>
+                  <NavLink
+                    exact
+                    to={el.route}
+                    id={el.name === 'services' ? 'services' : null}
+                  >
                     {el.name}
                   </NavLink>
                 </li>
@@ -34,4 +48,4 @@ const Nav = () => {
   );
 };
 
-export default Nav;
+export default withRouter(Nav);

@@ -1,23 +1,30 @@
 import React from 'react';
 
-import Soclinks from '../Soclinks/Soclinks';
-
-import { test } from '../../test';
-
+import ReactHtmlParser from 'react-html-parser';
+import { styles } from '../../styles/main';
 import './About.less';
-const About = () => {
+const About = props => {
+  const { title, style, desc } = props.params;
+  const classes = styles();
   return (
     <div
-      style={{ backgroundImage: `url(${test.about.bg})` }}
+      style={{
+        background:
+          style.bg.type === 'image'
+            ? `url(${style.bg.val})`
+            : style.bg.type === 'color'
+            ? style.bg.val
+            : 'black'
+      }}
       className="aboutus"
     >
-      <div>
-        <h2>{test.about.title}</h2>
-        <p>{test.about.desc}</p>
-      </div>
-      <span>
-        <Soclinks style={{ left: '10%' }} />
-      </span>
+      {' '}
+      {style.bg.type === 'video' && (
+        <video className={classes.bgVideoPlayer} autoPlay muted loop>
+          <source src={style.bg.val} type="video/mp4" />
+        </video>
+      )}
+      <div>{ReactHtmlParser(desc)}</div>
     </div>
   );
 };

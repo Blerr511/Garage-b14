@@ -1,25 +1,85 @@
 import { makeStyles } from '@material-ui/core/styles';
 import { amber, green } from '@material-ui/core/colors';
-
 export const styles = makeStyles(theme => ({
   verticalTabs: {
     flexGrow: 1,
     backgroundColor: theme.palette.background.paper,
     display: 'flex',
-    height: '100%'
+    height: '100%',
+    width: '100%'
+  },
+  errorText: {
+    padding: '10px 20px',
+    marginBottom: '20px',
+    border: '2px solid #f00',
+    fontWeight: '100 !important',
+    fontSize: '18px !important',
+    background: '#000'
+  },
+  successText: {
+    padding: '10px 20px',
+    marginBottom: '20px',
+    border: '2px solid #0f0',
+    fontWeight: '100 !important',
+    fontSize: '18px !important',
+    background: '#000'
+  },
+  flexBetween: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end'
+  },
+  flexCenter: {
+    width: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    zIndex: 10
+  },
+  fullWidthColumn: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    minHeight: '400px',
+    position: 'relative'
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+
+    padding: theme.spacing(3),
+
+    overflowX: 'auto'
+  },
+  bgVideoPlayer: {
+    width: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 0
   },
   pageDesc: {
     display: 'flex',
     alignItems: 'flex-end',
     marginBottom: '10px'
   },
+  horizontalMargin: {
+    margin: theme.spacing(2)
+  },
   pageHead: {
     display: 'flex',
     justifyContent: 'space-between'
   },
+
   flexWrap: {
     display: 'flex',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    justifyContent: 'center'
   },
   tabePanel: {},
   tabs: {
@@ -34,7 +94,7 @@ export const styles = makeStyles(theme => ({
     gridTemplateRows: 'auto'
   },
   formControl: {
-    margin: '15px 0'
+    margin: '30px 0'
   },
   flexColumn: {
     display: 'flex',

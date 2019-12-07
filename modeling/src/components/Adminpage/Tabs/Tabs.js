@@ -32,8 +32,9 @@ import FormHelperText from '@material-ui/core/FormHelperText';
 import Select from '@material-ui/core/Select';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import IconButton from '@material-ui/core/IconButton';
-
 import Message from '../Message/Message';
+import { EditorState, ContentState, convertToRaw } from 'draft-js';
+import { Editor } from '@tinymce/tinymce-react';
 import Demo from '../Demo/Demo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -97,6 +98,7 @@ const FileListToArray = fl => {
   }
   return arr;
 };
+let jsonDesc = ContentState.createFromText('');
 
 export default function FullWidthTabs(props) {
   const contentFileRef = useRef();
@@ -104,12 +106,14 @@ export default function FullWidthTabs(props) {
   const contentDescRef = useRef();
   const titleRef = useRef();
   const descRef = useRef();
-
   const classes = useStyles();
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
   const [title, setTitle] = React.useState('');
-  const [desc, setDesc] = React.useState('');
+
+  const [tinyContent, setTinyContent] = React.useState('');
+
+  const [desc, setDesc] = React.useState();
   const newContent = {
     title: '',
     desc: '',
@@ -124,7 +128,6 @@ export default function FullWidthTabs(props) {
       b: 0
     }
   });
-  const [titlePosition, setTitlePosition] = React.useState('left');
   const [colorChange, setColorChange] = React.useState(false);
   const [template, setTemplate] = React.useState('template1');
   const [expanded, setExpanded] = React.useState(false);
@@ -146,21 +149,13 @@ export default function FullWidthTabs(props) {
 
   const savePage = async _ => {
     if (!loading) {
-      const { title, desc, titlePosition, bg, bgtype, template, content } = _;
-
+      const { title, bg, bgtype, template, content } = _;
       setLoading(true);
       const _bg =
-        bgtype === 'color'
-          ? bg.hex
-          : bgtype === 'image'
-          ? bg.image
-          : bgtype === 'video'
-          ? bg.video
-          : null;
+        bgtype === 'color' ? bg.hex : bgtype === 'image/video' ? bg.file : null;
 
       const jsonData = {
         title: title,
-        titlePosition: titlePosition,
         desc: desc,
         bg: _bg,
         bgtype: bgtype,
@@ -180,7 +175,6 @@ export default function FullWidthTabs(props) {
         }
       }
       content.map(el => {
-        console.log(el);
         if (el.title !== undefined) formData.append('contentTitle', el.title);
         if (el.desc !== undefined) formData.append('contentDesc', el.desc);
         if (el.img !== undefined) formData.append('contentFile', el.img);
@@ -220,7 +214,7 @@ export default function FullWidthTabs(props) {
     setDesc('');
     setDemoUrl('');
     titleRef.current.value = '';
-    descRef.current.value = '';
+    // descRef.current.value = '';
     Object.assign(newContent, {
       title: '',
       desc: '',
@@ -240,7 +234,6 @@ export default function FullWidthTabs(props) {
         b: 0
       }
     });
-    setTitlePosition('left');
     setTemplate('template1');
     setContent([]);
     setPortfolio([]);
@@ -273,17 +266,20 @@ export default function FullWidthTabs(props) {
   const handleChangeIndex = index => {
     setValue(index);
   };
-  const hundlebgtypechange = (e, t) => setbgtype(t);
+  const hundlebgtypechange = (e, t) => setbgtype(e.target.value);
   const contentChangeHundler = _ => {
     Object.assign(newContent, _);
   };
+  const portfolioTitleRef = React.useRef();
+  const portfolioDescRef = React.useRef();
+  const portfolioImgRef = React.useRef();
   const addContentHundler = _ => {
     setContent(
       content.concat({
         id: content.length,
-        title: newContent.title,
-        desc: newContent.desc,
-        img: newContent.img
+        title: contentTitleRef.current.value,
+        desc: contentDescRef.current.value,
+        img: contentFileRef.current.files[0]
       })
     );
 
@@ -301,7 +297,7 @@ export default function FullWidthTabs(props) {
     Object.assign(tempPortfolio, _);
   };
   const closeMessage = () => {
-    setMessage({ type: 'success', message: '', open: false });
+    setMessage({ ...message, open: false });
   };
   const removeContentItem = _ => {
     for (let i = 0; i < content.length; i++) {
@@ -320,19 +316,27 @@ export default function FullWidthTabs(props) {
       if (e.id === _) {
         const temp = portfolio.slice();
         temp.splice(i, 1);
-        console.log(temp);
         setPortfolio(temp);
         break;
       }
     }
   };
   const addNewPortfolio = _ => {
-    setPortfolio(portfolio.concat({ ...tempPortfolio, id: portfolio.length }));
-    Object.assign(tempPortfolio, {
-      author: '',
-      tags: '',
-      img: null
-    });
+    const title = portfolioTitleRef.current.value;
+    const desc = portfolioDescRef.current.value;
+    const img = portfolioImgRef.current.files[0];
+    portfolioTitleRef.current.value = '';
+    portfolioDescRef.current.value = '';
+    portfolioImgRef.current.value = '';
+    setPortfolio(
+      portfolio.concat({
+        title: title,
+        desc: desc,
+        img: img,
+        id: portfolio.length
+      })
+    );
+
     setPortfolioDialog(false);
   };
 
@@ -391,19 +395,8 @@ export default function FullWidthTabs(props) {
                   margin="normal"
                   inputRef={titleRef}
                 />
-                <FormControl className={classes.selectInput}>
-                  <InputLabel htmlFor="age-simple">Title position</InputLabel>
-                  <Select
-                    value={titlePosition}
-                    onChange={e => setTitlePosition(e.target.value)}
-                  >
-                    <MenuItem value="left">left</MenuItem>
-                    <MenuItem value="center">center</MenuItem>
-                    <MenuItem value="right">right</MenuItem>
-                  </Select>
-                </FormControl>
               </div>
-              <TextField
+              {/* <TextField
                 id="standard-multiline-static"
                 label="Description"
                 multiline
@@ -412,92 +405,117 @@ export default function FullWidthTabs(props) {
                 onBlur={_ => setDesc(_.target.value)}
                 className={classes.textField}
                 margin="normal"
-              />
-              <div>
-                <FormControl
-                  component="fieldset"
-                  className={classes.formControl}
-                >
-                  <FormLabel component="legend">Background type</FormLabel>
-                  <RadioGroup
-                    aria-label="position"
-                    name="position"
-                    value={bgtype}
-                    onChange={hundlebgtypechange}
-                    row
-                  >
-                    <FormControlLabel
-                      value="color"
-                      control={<Radio color="primary" />}
-                      label="Color"
-                      labelPlacement="top"
-                    />
-                    <FormControlLabel
-                      value="image"
-                      control={<Radio color="primary" />}
-                      label="Image"
-                      labelPlacement="top"
-                    />
-                    <FormControlLabel
-                      value="video"
-                      control={<Radio color="primary" />}
-                      label="Video"
-                      labelPlacement="top"
-                    />
-                  </RadioGroup>
-                </FormControl>
-              </div>
-              {bgtype === 'color' ? (
-                <div
-                  style={{
-                    textAlign: 'center',
-                    maxWidth: '100px',
-                    cursor: 'pointer',
-                    padding: '8px 16px',
-                    border: '3px solid #ccc',
-                    backgroundColor: bg.hex,
-                    position: 'relative',
-                    color:
-                      bg.rgb.r + bg.rgb.g + bg.rgb.b < (256 + 256 + 256) / 2
-                        ? '#fff'
-                        : '#000'
+              /> */}
+              {/* <input type="text" style={{ display: 'none' }} ref={descRef} /> */}
+              <div style={{ minHeight: '200px', wordBreak: 'break-all' }}>
+                <Editor
+                  apiKey={process.env.TINYAPIKEY}
+                  onEditorChange={(content, editor) => setDesc(content)}
+                  value={desc}
+                  cloudChannel="5-stable"
+                  disabled={false}
+                  id="uuid"
+                  init={{
+                    // selector: 'textarea#full-featured',
+                    plugins:
+                      ' preview powerpaste casechange autolink  directionality advcode visualblocks visualchars fullscreen  link  table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists checklist wordcount tinymcespellchecker a11ychecker  textpattern noneditable  formatpainter permanentpen  charmap mentions  linkchecker emoticons',
+                    toolbar:
+                      'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons  |   pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
+                    template_cdate_format:
+                      '[Date Created (CDATE): %m/%d/%Y : %H:%M:%S]',
+                    template_mdate_format:
+                      '[Date Modified (MDATE): %m/%d/%Y : %H:%M:%S]',
+                    height: 250,
+                    quickbars_selection_toolbar:
+                      'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
+                    noneditable_noneditable_class: 'mceNonEditable',
+                    toolbar_drawer: 'sliding',
+                    spellchecker_dialog: true,
+                    spellchecker_whitelist: ['Ephox', 'Moxiecode'],
+                    tinycomments_mode: 'embedded',
+                    menubar: false,
+                    content_style: '.mymention{ color: gray; }',
+                    contextmenu: 'link',
+                    mentions_selector: '.mymention'
+                    // mentions_fetch: mentions_fetch,
+                    // mentions_menu_hover: mentions_menu_hover,
+                    // mentions_menu_complete: mentions_menu_complete,
+                    // mentions_select: mentions_select
                   }}
-                  onClick={_ => setColorChange(true)}
-                >
-                  {colorChange ? (
-                    <div
-                      style={{
-                        width: '250px',
-                        position: 'absolute',
-                        zIndex: 12
-                      }}
-                      ref={wrapperRef}
+                  inline={false}
+                />
+              </div>
+              <section
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '150px 150px',
+                  gridGap: '20px',
+                  margin: '15px 0'
+                }}
+              >
+                <div>
+                  <FormControl
+                    component="fieldset"
+                    className={classes.formControl}
+                  >
+                    <FormLabel component="legend">Background</FormLabel>
+                    <Select
+                      aria-label="position"
+                      name="position"
+                      value={bgtype}
+                      onChange={hundlebgtypechange}
                     >
-                      <SketchPicker
-                        disableAlpha={false}
-                        color={bg}
-                        onChange={e => {
-                          setBg({ ...bg, ...e });
-                        }}
-                      />
-                    </div>
-                  ) : null}
-                  {bg.hex}
+                      <MenuItem value="color">color</MenuItem>
+                      <MenuItem value="image/video">image/video</MenuItem>
+                    </Select>
+                  </FormControl>
                 </div>
-              ) : bgtype === 'image' ? (
-                <input
-                  accept="image/png, image/jpeg"
-                  type="file"
-                  onChange={e => setBg({ ...bg, image: e.target.files[0] })}
-                  style={{ minHeight: '46px' }}
-                />
-              ) : bgtype === 'video' ? (
-                <input
-                  type="file"
-                  onChange={e => setBg({ ...bg, video: e.target.files[0] })}
-                  style={{ minHeight: '46px' }}
-                />
-              ) : null}
+                {bgtype === 'color' ? (
+                  <div
+                    style={{
+                      textAlign: 'center',
+                      maxWidth: '100px',
+                      cursor: 'pointer',
+                      padding: '8px 16px',
+                      border: '3px solid #ccc',
+                      backgroundColor: bg.hex,
+                      position: 'relative',
+                      color:
+                        bg.rgb.r + bg.rgb.g + bg.rgb.b < (256 + 256 + 256) / 2
+                          ? '#fff'
+                          : '#000'
+                    }}
+                    onClick={_ => setColorChange(true)}
+                  >
+                    {colorChange ? (
+                      <div
+                        style={{
+                          width: '250px',
+                          position: 'absolute',
+                          zIndex: 12
+                        }}
+                        ref={wrapperRef}
+                      >
+                        <SketchPicker
+                          disableAlpha={false}
+                          color={bg}
+                          onChange={e => {
+                            setBg({ ...bg, ...e });
+                          }}
+                        />
+                      </div>
+                    ) : null}
+                    {bg.hex}
+                  </div>
+                ) : bgtype === 'image/video' ? (
+                  <input
+                    accept=".png, .jpeg,.jpg, .mp4,.webm,.ogg"
+                    type="file"
+                    onChange={e => setBg({ ...bg, file: e.target.files[0] })}
+                    style={{ minHeight: '46px' }}
+                  />
+                ) : null}
+              </section>
               <FormControl component="fieldset" className={classes.formControl}>
                 <FormLabel component="legend">Template</FormLabel>
                 <RadioGroup
@@ -585,15 +603,15 @@ export default function FullWidthTabs(props) {
                       className={classes.textField}
                       margin="normal"
                       defaultValue=""
-                      onChange={_ =>
-                        contentChangeHundler({ title: _.target.value })
-                      }
+                      // onChange={_ =>
+                      //   contentChangeHundler({ title: _.target.value })
+                      // }
                     />
                     <TextField
                       inputRef={contentDescRef}
-                      onChange={_ =>
-                        contentChangeHundler({ desc: _.target.value })
-                      }
+                      // onChange={_ =>
+                      //   contentChangeHundler({ desc: _.target.value })
+                      // }
                       defaultValue=""
                       id="standard-multiline-static"
                       label="Description"
@@ -607,11 +625,11 @@ export default function FullWidthTabs(props) {
                       accept="image/png, image/jpeg"
                       ref={contentFileRef}
                       type="file"
-                      onChange={_ => {
-                        contentChangeHundler({
-                          img: _.target.files[0]
-                        });
-                      }}
+                      // onChange={_ => {
+                      //   contentChangeHundler({
+                      //     img: _.target.files[0]
+                      //   });
+                      // }}
                     />
                     <div style={{ marginTop: '15px' }}>
                       <Button
@@ -660,7 +678,6 @@ export default function FullWidthTabs(props) {
                               />
                             </IconButton>
                           </Card>
-                          );
                         </div>
                       );
                     })
@@ -695,26 +712,18 @@ export default function FullWidthTabs(props) {
                       margin="dense"
                       label="Author"
                       type="text"
-                      onChange={_ =>
-                        portfolioItemChangeHundler({ title: _.target.value })
-                      }
+                      inputRef={portfolioTitleRef}
                     />{' '}
                     <TextField
                       margin="dense"
                       label="Tags"
                       type="text"
-                      onChange={_ =>
-                        portfolioItemChangeHundler({ desc: _.target.value })
-                      }
+                      inputRef={portfolioDescRef}
                     />
                     <input
                       accept="image/png, image/jpeg"
                       type="file"
-                      onChange={_ =>
-                        portfolioItemChangeHundler({
-                          img: _.target.files[0]
-                        })
-                      }
+                      ref={portfolioImgRef}
                     />
                   </DialogContent>
                   <DialogActions>
@@ -734,7 +743,6 @@ export default function FullWidthTabs(props) {
                       title: title,
                       desc: desc,
                       bg: bg,
-                      titlePosition: titlePosition,
                       template: template,
                       bgtype: bgtype,
                       content:

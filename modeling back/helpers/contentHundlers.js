@@ -9,7 +9,7 @@ module.exports.add = async (req, res) => {
   const newService = new Service({
     title: title,
     desc: desc,
-    img: file?(appRoot + '\\' + file.path).replace(/\\/g, '/'):''
+    img: file ? (appRoot + '\\' + file.path).replace(/\\/g, '/') : ''
   });
   const t = await Page.updateOne(
     { _id: pageId },
@@ -38,17 +38,20 @@ module.exports.remove = async (req, res) => {
 
   Page.findOne({ _id: pageId }, (err, doc) => {
     if (!err) {
-      for (let i = 0; i < doc.content.length; i++) {
-        if (JSON.stringify(doc.content[i]._id) == JSON.stringify(contentId)) {
-          fs.unlink(doc.content[i].img.replace(appRoot, appDir), err => {
-            if (err) console.log(err);
-            else console.log('file removed');
-          });
-          break;
+      try {
+        for (let i = 0; i < doc.content.length; i++) {
+          if (JSON.stringify(doc.content[i]._id) == JSON.stringify(contentId)) {
+            fs.unlink(doc.content[i].img.replace(appRoot, appDir), err => {
+              if (err) console.error(err);
+            });
+            break;
+          }
         }
+      } catch (err) {
+        console.error(err);
       }
     } else {
-      console.log(err);
+      console.error(err);
     }
   });
   const u = await Page.updateOne(

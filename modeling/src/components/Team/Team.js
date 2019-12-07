@@ -2,8 +2,6 @@ import React from 'react';
 
 import { test } from '../../test';
 
-import Soclinks from '../Soclinks/Soclinks';
-
 import './Team.less';
 
 const Team = () => {
@@ -22,9 +20,7 @@ const Team = () => {
             </div>
           </section>
         ))}
-        <div style={{ position: 'relative' }} className="next">
-          <Soclinks style={{ left: '0' }} />
-        </div>
+        <div style={{ position: 'relative' }} className="next"></div>
       </div>
     </div>
   );

@@ -89,6 +89,9 @@ class Adminpage extends Component {
         <Router>
           <Sidebar routes={_routes} />
           <Switch>
+            {routes[0] && (
+              <Route path={`${path}`} exact component={routes[0].component} />
+            )}
             {routes.map(el => (
               <Route
                 key={el.route}

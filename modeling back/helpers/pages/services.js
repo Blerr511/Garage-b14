@@ -25,7 +25,7 @@ module.exports.set = async (req, res) => {
     if (desc) page.desc = desc;
     if (req.file) {
       fs.unlink(page.bg, err => {
-        if (err) console.log(err);
+        if (err) console.error(err);
       });
       page.bg = bg;
     }
@@ -72,7 +72,7 @@ module.exports.removeService = async (req, res) => {
     const element = tempPage.content[i];
     if (element._id.toString() === _id) {
       fs.unlink(element.img, err => {
-        if (err) console.log(err);
+        if (err) console.error(err);
       });
       break;
     }
@@ -112,7 +112,7 @@ module.exports.editService = async (req, res) => {
       const element = page.content[i];
       if (element._id.toString() === _id) {
         fs.unlink(element.img, err => {
-          if (err) console.log(err);
+          if (err) console.error(err);
         });
         break;
       }

@@ -13,6 +13,10 @@
 .sidebar > section {
   background-color: #000000aa;
 }
+.sidebar .logoLink {
+  display: flex;
+  justify-content: space-around !important;
+}
 .sidebar .logo a {
   color: #fff;
   display: flex;

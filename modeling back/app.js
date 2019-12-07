@@ -5,7 +5,6 @@ const http = require('http'),
   cookieParser = require('cookie-parser'),
   dotenv = require('dotenv'),
   multer = require('multer'),
-  path = require('path'),
   os = require('os');
 dotenv.config();
 global.appRoot =
@@ -19,7 +18,10 @@ const storage = multer.diskStorage({
     if (
       file.mimetype == 'image/jpg' ||
       file.mimetype == 'image/jpeg' ||
-      file.mimetype == 'image/png'
+      file.mimetype == 'image/png' ||
+      file.mimetype == 'video/mp4' ||
+      file.mimetype == 'video/webm' ||
+      file.mimetype == 'video/ogg'
     ) {
       return true;
     } else {
@@ -36,6 +38,7 @@ const storage = multer.diskStorage({
     );
   }
 });
+
 const decodeJWT = require('./helpers/decodeJWT'),
   fidnUser = require('./helpers/findUser'),
   setAboutus = require('./helpers/pages/aboutus').set,
@@ -49,8 +52,26 @@ const decodeJWT = require('./helpers/decodeJWT'),
   getPages = require('./helpers/pages/get'),
   addPages = require('./helpers/addPage'),
   removePage = require('./helpers/addPage').removePage,
+  editPage = require('./helpers/addPage').editPage,
   addContent = require('./helpers/contentHundlers').add,
-  removeContent = require('./helpers/contentHundlers').remove;
+  removeContent = require('./helpers/contentHundlers').remove,
+  getMainItem = require('./helpers/mainPage').get,
+  addMainItem = require('./helpers/mainPage').add,
+  removeMainItem = require('./helpers/mainPage').remove,
+  addSoclink = require('./helpers/soclinks').add,
+  editSoclink = require('./helpers/soclinks').edit,
+  removeSoclink = require('./helpers/soclinks').remove,
+  getSoclinks = require('./helpers/soclinks').get,
+  addContactInfo = require('./helpers/contactInfo').add,
+  getContactInfo = require('./helpers/contactInfo').get,
+  editContactInfo = require('./helpers/contactInfo').edit,
+  removeContactInfo = require('./helpers/contactInfo').remove,
+  getContactPage = require('./helpers/contactustext').get,
+  editContactPage = require('./helpers/contactustext').edit,
+  getMails = require('./helpers/mail').get,
+  newMail = require('./helpers/mail').new,
+  readMail = require('./helpers/mail').read,
+  rmMail = require('./helpers/mail').delete;
 const upload = multer({ storage: storage });
 
 const app = express();
@@ -112,7 +133,31 @@ app.post('/api/addpage', upload.any(), addPages);
 app.get('/api/get', getPages);
 app.post('/api/addContent', upload.single('file'), addContent);
 app.post('/api/removeContent', upload.none(), removeContent);
-app.post('/api/removePage',upload.none(),removePage)
+app.post('/api/removePage', upload.none(), removePage);
+app.post('/api/editPage', upload.single('bg'), editPage);
+
+app.get('/api/mainItems', getMainItem);
+app.post('/api/mainItems/add', upload.any(), addMainItem);
+app.post('/api/mainItems/rm', upload.none(), removeMainItem);
+
+app.get('/api/soclinks', getSoclinks);
+app.post('/api/soclinks/add', upload.none(), addSoclink);
+app.post('/api/soclinks/edit', upload.none(), editSoclink);
+app.post('/api/soclinks/rm', upload.none(), removeSoclink);
+
+app.get('/api/contactInfo', getContactInfo);
+app.post('/api/contactInfo/add', upload.none(), addContactInfo);
+app.post('/api/contactInfo/edit', upload.none(), editContactInfo);
+app.post('/api/contactInfo/rm', upload.none(), removeContactInfo);
+
+app.get('/api/contactPage', getContactPage);
+app.post('/api/contactPage/edit', upload.none(), editContactPage);
+
+app.get('/api/mails', getMails);
+app.post('/api/mails/new', upload.none(), newMail);
+app.post('/api/mails/read', upload.none(), readMail);
+app.post('/api/mails/rm', upload.none(), rmMail);
+
 server.listen(process.env.PORT || 8080, () =>
-  console.log(`app listen ${process.env.PORT || 8080}`)
+  console.info(`app listen ${process.env.PORT || 8080}`)
 );

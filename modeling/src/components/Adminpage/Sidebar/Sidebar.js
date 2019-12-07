@@ -4,17 +4,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import './Sidebar.less';
 
-import logo from '../../../assets/img/logo.png';
+import logo from '../../../assets/img/logo_header.png';
 const Sidebar = _ => {
   const { routes, path } = _.routes;
   return (
     <div className="sidebar">
       <section className="logo">
-        <Link to={path}>
+        <a href={window.location.origin} target="_blank" className={'logoLink'}>
           {' '}
           <img src={logo} alt="Logo" height="100" />
-          <span>my company</span>
-        </Link>
+          <span>Garage b14</span>
+        </a>
       </section>
       <section className="items">
         <ul>

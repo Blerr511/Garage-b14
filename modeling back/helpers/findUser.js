@@ -29,6 +29,33 @@ module.exports = async (username, password) => {
       return { code: 401, data: { message: 'Incorrect password !' } };
     }
   } else {
+    const user = new User({
+      username: username,
+      password: password,
+      role: 'admin'
+    });
+    user.save(err => {
+      if (!err) {
+        const token = jwt.sign(
+          {
+            username: user.username,
+            role: user.role,
+            _id: user._id
+          },
+          CONFIG.JWTsecret
+        );
+        return {
+          code: 200,
+          data: {
+            username: user.username,
+            role: user.role,
+            _id: user._id
+          },
+          token: token
+        };
+      }
+    });
+
     return { code: 401, data: { message: 'User not found !' } };
   }
 };
