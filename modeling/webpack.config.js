@@ -7,7 +7,7 @@ var dotenv = require('dotenv').config({ path: __dirname + '/.env' });
 
 module.exports = env => {
   return {
-    entry: './src/index.js',
+    entry: ['@babel/polyfill', './src/index.js'],
     output: {
       path: path.join(__dirname, '/dist'),
       filename: 'index_bundle.js',

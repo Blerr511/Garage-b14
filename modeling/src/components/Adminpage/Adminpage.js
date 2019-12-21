@@ -14,8 +14,8 @@ class Adminpage extends Component {
       logged: false,
       loading: false,
       user: {
-        username: 'johan',
-        role: 'admin'
+        username: '',
+        role: ''
       },
       message: {
         open: false,
@@ -87,7 +87,7 @@ class Adminpage extends Component {
     return this.state.logged ? (
       <div className="adminpage">
         <Router>
-          <Sidebar routes={_routes} />
+          <Sidebar routes={_routes} setAdminState={this.setAdminState} />
           <Switch>
             {routes[0] && (
               <Route path={`${path}`} exact component={routes[0].component} />

@@ -58,6 +58,4 @@ module.exports.edit = async (req, res) => {
       else res.status(400).send({ code: 400, message: 'Something goes wrong' });
     }
   );
-
-  console.log(resault);
 };

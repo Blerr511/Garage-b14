@@ -44,10 +44,10 @@ module.exports.add = async (req, res) => {
       if (err) {
         if (mainItem.logo)
           fs.unlink(mainItem.logo, err => {
-            if (err) console.log(err);
+            if (err) console.error(err);
           });
         fs.unlink(mainItem.bg, err => {
-          if (err) console.log(err);
+          if (err) console.error(err);
         });
         throw err;
       } else {
@@ -85,10 +85,10 @@ module.exports.remove = async (req, res) => {
   const mainItem = await MainItem.findOne({ _id: _id });
   if (mainItem.logo)
     fs.unlink(mainItem.logo, err => {
-      if (err) console.log(err);
+      if (err) console.error(err);
     });
   fs.unlink(mainItem.bg, err => {
-    if (err) console.log(err);
+    if (err) console.error(err);
   });
   const result = await MainItem.deleteOne({ _id: _id });
   res

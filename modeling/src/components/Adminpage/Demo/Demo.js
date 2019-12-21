@@ -6,7 +6,7 @@ const Demo = props => {
   return (
     <iframe
       style={{ width: '100%', height: '100vh' }}
-      src={`http://${process.env.HOST}:${process.env.PORT}/${props.route}`}
+      src={`${process.env.HOST}/${props.route}`}
       frameBorder="0"
     ></iframe>
   );

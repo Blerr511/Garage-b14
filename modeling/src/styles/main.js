@@ -57,11 +57,14 @@ export const styles = makeStyles(theme => ({
     overflowX: 'auto'
   },
   bgVideoPlayer: {
-    width: '100%',
+    width: '100vw',
+    height: '100vh',
+    objectFit: 'cover',
     position: 'absolute',
     top: 0,
     left: 0,
-    zIndex: 0
+    zIndex: 0,
+    userSelect: 'none'
   },
   pageDesc: {
     display: 'flex',

@@ -15,11 +15,12 @@
   padding-top: 20px;
 }
 .navbar ul li button,
-.navbar ul li a {
+.navbar ul li a,
+.navbar ul li a:visited {
   border: none;
   background: transparent;
   outline: none;
-  color: #fff;
+  color: #fff !important;
   font-size: 18px;
   padding: 8px 12px;
   margin: 5px;
@@ -31,4 +32,19 @@
 .navbar ul li #services {
   background-color: #ffe15f !important;
   color: black !important;
+}
+.navbar #logoMobile {
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+.mobileHeader {
+  display: flex;
+  justify-content: space-between;
+  z-index: 16;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: calc(100% - 20px);
+  padding: 10px;
 }

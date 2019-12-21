@@ -3,6 +3,7 @@ body {
   padding: 0;
   margin: 0;
   background-color: #000000dd;
+  overflow-x: hidden;
 }
 
 input[type='file'] {
@@ -29,6 +30,15 @@ li {
   opacity: 0.01;
 }
 
+.page1-enter {
+  animation: slideInBottom1 0.5s forwards linear;
+  overflow-y: hidden;
+}
+.page1-exit {
+  animation: slideOutBottom1 0.5s forwards linear;
+  overflow: hidden;
+}
+
 .fade-enter.fade-enter-active {
   opacity: 1;
   transition: opacity 300ms ease-in;
@@ -38,34 +48,46 @@ li {
   opacity: 1;
 }
 
-@keyframes slideInLeft {
-  from {
-    transform: translate3d(-100%, 0, 0);
-    visibility: visible;
+@keyframes slideInBottom1 {
+  0% {
+    transform: translate3d(0, -100%, 0);
+    // z-index: 2;
+    filter: blur(100px);
   }
-
-  to {
-    -webkit-transform: translate3d(0, 0, 0);
+  50% {
+    transform: translate3d(0, -50%, 0);
+    filter: blur(20px);
+  }
+  100% {
     transform: translate3d(0, 0, 0);
+    // z-index: 2;
+    filter: blur(0);
   }
 }
 
-@keyframes slideOutLeft {
-  from {
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
+@keyframes slideOutBottom1 {
+  0% {
+    transform: /*scale(1)*/ translate3d(0, 0, 0);
+    // z-index: 1;
+    filter: blur(0px);
   }
 
-  to {
-    visibility: hidden;
-    transform: translate3d(100%, 0, 0);
+  50% {
+    transform: /*scale(0.8)*/ translate3d(0, 50%, 0);
+    // z-index: 1;
+    filter: blur(1px);
+  }
+  100% {
+    transform: /*scale(0.8)*/ translate3d(0, 100%, 0);
+    // z-index: 1;
+    filter: blur(10px);
   }
 }
 
 @keyframes slideInBottom {
   0% {
     transform: translate3d(0, 100%, 0);
-    z-index: 2;
+    // z-index: 2;
     filter: blur(100px);
   }
   50% {
@@ -74,26 +96,26 @@ li {
   }
   100% {
     transform: translate3d(0, 0, 0);
-    z-index: 2;
+    // z-index: 2;
     filter: blur(0);
   }
 }
 
 @keyframes slideOutBottom {
   0% {
-    transform: scale(1);
-    z-index: 1;
+    transform: /*scale(1)*/ translate3d(0, 0, 0);
+    // z-index: 1;
     filter: blur(0px);
   }
 
   50% {
-    transform: scale(0.8) translate3d(0, -50%, 0);
-    z-index: 1;
+    transform: /*scale(0.8)*/ translate3d(0, -50%, 0);
+    // z-index: 1;
     filter: blur(1px);
   }
   100% {
-    transform: scale(0.8) translate3d(0, -100%, 0);
-    z-index: 1;
+    transform: /*scale(0.8)*/ translate3d(0, -100%, 0);
+    // z-index: 1;
     filter: blur(10px);
   }
 }

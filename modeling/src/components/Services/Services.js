@@ -11,18 +11,21 @@ const Services = props => {
     <div
       className="services"
       style={{
-        background:
-          style.bg.type === 'image'
-            ? `url(${style.bg.val})`
-            : style.bg.type === 'color'
-            ? style.bg.val
-            : 'black'
+        background: style.bg.type === 'color' ? style.bg.val : 'black'
       }}
     >
       {style.bg.type === 'video' && (
         <video className={classes.bgVideoPlayer} autoPlay muted loop>
           <source src={style.bg.val} type="video/mp4" />
         </video>
+      )}
+      {style.bg.type === 'image' && (
+        <img
+          className={classes.bgVideoPlayer}
+          draggable={false}
+          src={style.bg.val}
+          alt="Background"
+        />
       )}
       <div style={{ zIndex: 10, position: 'relative' }}>
         {/* <h2>our services</h2> */}

@@ -3,7 +3,8 @@ import {
   Switch,
   Route,
   withRouter,
-  BrowserRouter as Router
+  BrowserRouter as Router,
+  NavLink
 } from 'react-router-dom';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import Nav from './components/Nav/Nav';
@@ -17,10 +18,12 @@ import Adminpage from './components/Adminpage/Adminpage';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import notFound from './components/404';
 import './App.less';
+import { Hidden } from '@material-ui/core';
 const App = _ => {
   const [myRoutes, setMyRoutes] = React.useState([]);
   const [mainPageRoutes, setMainPageRoutes] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [dir, setDir] = React.useState('page');
   React.useEffect(() => {
     if (
       !(
@@ -31,6 +34,7 @@ const App = _ => {
     ) {
       document.cookie = 'uniqueId=' + Date.now();
     }
+    window.mMatchMedia = window.matchMedia('(max-width: 724px)');
     fetch(`${process.env.SERVER}/api/mainItems`)
       .then(_ => _.json())
       .then(mainItems => {
@@ -50,7 +54,9 @@ const App = _ => {
                   route: '/(|main)',
                   name: 'Home page',
                   navLink: false,
-                  component: () => <Mainpage p={_} params={mainItems.data} />
+                  component: () => (
+                    <Mainpage setDir={setDir} p={_} params={mainItems.data} />
+                  )
                 }
               ]
                 .concat(
@@ -91,12 +97,15 @@ const App = _ => {
           <Route path="/admin" component={Adminpage}></Route>
           <Route
             render={p => {
+              /\/main\/*.*/.test(p.location.pathname)
+                ? (document.body.style.overflow = 'hidden')
+                : (document.body.style.overflow = 'initial');
               return (
                 <div>
                   <Nav p={p} routes={myRoutes.concat(mainPageRoutes)} />
                   <TransitionGroup>
                     <CSSTransition
-                      classNames="page"
+                      classNames={dir}
                       key={p.location.pathname}
                       timeout={700}
                     >
@@ -116,6 +125,34 @@ const App = _ => {
                       </section>
                     </CSSTransition>
                   </TransitionGroup>
+                  {/^(\/main\/*.*)|(\/)$/.test(p.location.pathname) ? (
+                    <div className="verticalBar">
+                      <div>
+                        {mainPageRoutes.map((el, id) => {
+                          const location = p.location;
+                          return (
+                            <NavLink
+                              key={el.name}
+                              to={el.route}
+                              isActive={(match, location) => {
+                                if (location.pathname === el.route) {
+                                  return true;
+                                } else if (
+                                  (id === 0 && location.pathname === '/') ||
+                                  location.pathname === '/main'
+                                ) {
+                                  return true;
+                                }
+                                return false;
+                              }}
+                            >
+                              {/* <span className="dotVerticalBar"></span> */}
+                            </NavLink>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : null}
                   <Soclinks />
                 </div>
               );

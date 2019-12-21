@@ -328,7 +328,6 @@ const ContactData = () => {
       getSocItems();
       setMessage({ type: 'success', text: data.message, open: true });
     } catch (err) {
-      console.log('object');
       setLoading(false);
       if (err)
         var text =

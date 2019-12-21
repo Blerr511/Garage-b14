@@ -7,8 +7,7 @@ const http = require('http'),
   multer = require('multer'),
   os = require('os');
 dotenv.config();
-global.appRoot =
-  process.env.PROTOCOL + os.hostname() + ':' + (process.env.PORT || 8080);
+global.appRoot = process.env.DOMAIN;
 global.appDir = __dirname;
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
@@ -116,18 +115,18 @@ app.post('/logout', (req, res) => {
   res.clearCookie('token').send({ status: 'success' });
 });
 
-app.post('/api/aboutus', upload.single('bg'), setAboutus);
-app.get('/api/aboutus', getAboutus);
+// app.post('/api/aboutus', upload.single('bg'), setAboutus);
+// app.get('/api/aboutus', getAboutus);
 
-app.post('/api/services', upload.single('bg'), setServices);
-app.get('/api/services', getServices);
-app.put('/api/services', upload.single('img'), addServices);
-app.delete('/api/services', upload.none(), removeServices);
-app.patch('/api/services', upload.single('img'), editServices);
+// app.post('/api/services', upload.single('bg'), setServices);
+// app.get('/api/services', getServices);
+// app.put('/api/services', upload.single('img'), addServices);
+// app.delete('/api/services', upload.none(), removeServices);
+// app.patch('/api/services', upload.single('img'), editServices);
 
-app.get('/api/portfolio', portfolio.get);
-app.post('/api/portfolio', upload.single('bg'), portfolio.set);
-app.put('/api/portfolio', upload.single('img'), portfolio.add);
+// app.get('/api/portfolio', portfolio.get);
+// app.post('/api/portfolio', upload.single('bg'), portfolio.set);
+// app.put('/api/portfolio', upload.single('img'), portfolio.add);
 
 app.post('/api/addpage', upload.any(), addPages);
 app.get('/api/get', getPages);
@@ -158,6 +157,6 @@ app.post('/api/mails/new', upload.none(), newMail);
 app.post('/api/mails/read', upload.none(), readMail);
 app.post('/api/mails/rm', upload.none(), rmMail);
 
-server.listen(process.env.PORT || 8080, () =>
-  console.info(`app listen ${process.env.PORT || 8080}`)
+server.listen(process.env.APP_PORT || 8080, () =>
+  console.info(`app listen ${process.env.APP_PORT || 8080}`)
 );

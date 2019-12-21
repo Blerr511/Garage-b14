@@ -21,7 +21,7 @@ module.exports.get = async (req, res) => {
       .status(200)
       .send({ status: 200, Message: 'Ok', data: data, count: count });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(404).send({ status: 400, Message: err });
   }
 };
@@ -60,7 +60,6 @@ module.exports.new = async (req, res) => {
 
 module.exports.read = async (req, res) => {
   const { _id } = req.body;
-  console.log(_id);
   const del = await Mail.updateMany(
     typeof _id === 'string' ? { _id: _id } : { _id: { $in: _id } },
     { $set: { readed: true } }
@@ -74,7 +73,6 @@ module.exports.read = async (req, res) => {
 
 module.exports.delete = async (req, res) => {
   const { _id } = req.body;
-  console.log(_id);
   const del = await Mail.deleteMany(
     typeof _id === 'string' ? { _id: _id } : { _id: { $in: _id } }
   );
