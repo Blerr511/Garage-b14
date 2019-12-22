@@ -161,14 +161,5 @@ const Nav = props => {
 };
 
 export default withRouter(_ => {
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-  const foo = e => {
-    setWindowWidth(window.innerWidth);
-  };
-  useEffect(() => {
-    window.mMatchMedia.addListener(foo);
-    return () => window.mMatchMedia.removeListener(foo);
-  }, []);
-
-  return windowWidth > 724 ? <Nav {..._} /> : <VerticalNav {..._} />;
+  return !_.matchMedia ? <Nav {..._} /> : <VerticalNav {..._} />;
 });

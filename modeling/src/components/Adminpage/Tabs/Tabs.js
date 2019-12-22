@@ -658,7 +658,7 @@ export default function FullWidthTabs(props) {
                   ? portfolio.map(el => {
                       const element = el;
                       return (
-                        <div key={Math.random()}>
+                        <div key={el.img}>
                           <Card key={el.img} className={classes.card}>
                             <CardMedia
                               className={classes.media}

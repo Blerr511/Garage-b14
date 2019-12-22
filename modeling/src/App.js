@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Switch,
   Route,
@@ -10,6 +10,8 @@ import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import Nav from './components/Nav/Nav';
 import Soclinks from './components/Soclinks/Soclinks';
 import Mainpage from './components/Mainpage/Mainpage';
+import Container from './components/Mainpage/Container';
+import MobileMainPage from './components/Mainpage/MobileMainPage';
 import Services from './components/Services/Services';
 import Portfolio from './components/Portfolio/Portfolio';
 import About from './components/About/About';
@@ -18,12 +20,25 @@ import Adminpage from './components/Adminpage/Adminpage';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import notFound from './components/404';
 import './App.less';
-import { Hidden } from '@material-ui/core';
+import AnchorLink from 'react-anchor-link-smooth-scroll';
 const App = _ => {
   const [myRoutes, setMyRoutes] = React.useState([]);
   const [mainPageRoutes, setMainPageRoutes] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [dir, setDir] = React.useState('page');
+  const [matchemediaState, setMatchmediaState] = React.useState(
+    window.innerWidth < 730
+  );
+  const [anchorActive, setAnchorActive] = React.useState(0);
+  const foo = e => {
+    // console.log(e.matches);
+    setMatchmediaState(window.innerWidth < 730);
+    // if (!e.matches) _.history.push('/');
+  };
+  const boo = _ => {
+    const pos = Math.round(window.scrollY / window.innerHeight);
+    if (pos !== anchorActive) setAnchorActive(pos);
+  };
   React.useEffect(() => {
     if (
       !(
@@ -35,6 +50,7 @@ const App = _ => {
       document.cookie = 'uniqueId=' + Date.now();
     }
     window.mMatchMedia = window.matchMedia('(max-width: 724px)');
+    window.mMatchMedia.addListener(foo);
     fetch(`${process.env.SERVER}/api/mainItems`)
       .then(_ => _.json())
       .then(mainItems => {
@@ -55,7 +71,12 @@ const App = _ => {
                   name: 'Home page',
                   navLink: false,
                   component: () => (
-                    <Mainpage setDir={setDir} p={_} params={mainItems.data} />
+                    <Container
+                      matchMedia={matchemediaState}
+                      setDir={setDir}
+                      p={_}
+                      params={mainItems.data}
+                    />
                   )
                 }
               ]
@@ -87,9 +108,8 @@ const App = _ => {
           });
       });
   }, []);
-
   return (
-    <div>
+    <div onWheel={boo}>
       {loading ? (
         <LoadingScreen />
       ) : (
@@ -97,12 +117,16 @@ const App = _ => {
           <Route path="/admin" component={Adminpage}></Route>
           <Route
             render={p => {
-              /\/main\/*.*/.test(p.location.pathname)
+              /\/main\/*.*/.test(p.location.pathname) && window.innerWidth > 724
                 ? (document.body.style.overflow = 'hidden')
                 : (document.body.style.overflow = 'initial');
               return (
                 <div>
-                  <Nav p={p} routes={myRoutes.concat(mainPageRoutes)} />
+                  <Nav
+                    matchMedia={matchemediaState}
+                    p={p}
+                    routes={myRoutes.concat(mainPageRoutes)}
+                  />
                   <TransitionGroup>
                     <CSSTransition
                       classNames={dir}
@@ -130,7 +154,21 @@ const App = _ => {
                       <div>
                         {mainPageRoutes.map((el, id) => {
                           const location = p.location;
-                          return (
+                          return matchemediaState ? (
+                            <span
+                              onClick={() =>
+                                setTimeout(() => setAnchorActive(id), 250)
+                              }
+                              key={el.name}
+                            >
+                              <AnchorLink
+                                className={
+                                  anchorActive === id ? 'active' : null
+                                }
+                                href={'#' + el.name}
+                              ></AnchorLink>
+                            </span>
+                          ) : (
                             <NavLink
                               key={el.name}
                               to={el.route}

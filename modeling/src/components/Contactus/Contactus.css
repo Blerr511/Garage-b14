@@ -44,6 +44,9 @@
   display: flex;
   justify-content: space-between;
 }
+.contactus > div > div > div:first-of-type {
+  max-width: 60%;
+}
 .contactus > div > div > div {
   display: flex;
   flex-direction: column;
@@ -86,4 +89,12 @@
   display: inline-block;
   width: 30px;
   height: 30px;
+}
+@media only screen and (max-width: 724px) {
+  .contactus > div > div {
+    flex-direction: column !important;
+  }
+  .contactus > div > div > div {
+    max-width: 100% !important;
+  }
 }

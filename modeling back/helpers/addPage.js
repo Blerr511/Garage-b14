@@ -1,5 +1,5 @@
 const { Page, Service } = require('../mongoose/Schemas');
-const fs = require('fs');
+const rmf = require('./mFs').rmf;
 const clgErr = err => {
   if (err) console.error(err);
 };
@@ -79,19 +79,14 @@ module.exports = (req, res) => {
 
 module.exports.removePage = async (req, res) => {
   const pageId = req.body.pageId;
-  Page.findOne({ _id: pageId }, (err, doc) => {
-    if (!err) {
-      try {
-        doc.content.forEach(el => {
-          fs.unlink(el.img.replace(appRoot, appDir), err => {
-            if (err) console.error(err);
-          });
-        });
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  });
+  const page = await Page.findOne({ _id: pageId });
+  page &&
+    page.content.forEach(el => {
+      rmf(el.img);
+    });
+
+  page.style.bg.type !== 'color' && rmf(page.style.bg.val);
+
   const remove = await Page.deleteOne({ _id: pageId });
   res.status(200).send({ code: 200, message: 'Page removed' });
 };
@@ -109,7 +104,7 @@ module.exports.editPage = async (req, res) => {
         bg: { val: req.body.bg, type: req.body.bgType }
       };
     else if (page.style.bg.type === 'image/video' && req.file) {
-      fs.unlink(page.style.bg.val.replace(appRoot, appDir), clgErr);
+      rmf(page.style.bg);
       updateData.style = {
         template: page.style.template,
         bg: {

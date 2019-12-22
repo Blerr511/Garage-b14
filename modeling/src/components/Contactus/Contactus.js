@@ -101,9 +101,7 @@ const Contactus = () => {
     <div className="contactus">
       <div>
         <div>
-          <div style={{ maxWidth: '60%' }}>
-            {state.text && ReactHtmlParser(state.text)}
-          </div>
+          <div>{state.text && ReactHtmlParser(state.text)}</div>
           <div>
             {message.show && (
               <span

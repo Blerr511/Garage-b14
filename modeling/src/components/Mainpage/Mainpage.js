@@ -1,56 +1,9 @@
 import React from 'react';
 
-import { Route, NavLink, withRouter } from 'react-router-dom';
+import { Route, withRouter } from 'react-router-dom';
 import ReactHtmlParser from 'react-html-parser';
 import { styles } from '../../styles/main';
 import './Mainpage.less';
-
-import { useEffect } from 'react';
-import { useState } from 'react';
-
-const __Mainpage = _ => {
-  const [params] = React.useState(_.params);
-  const classes = styles();
-
-  return (
-    <div className="mainPage">
-      {params.map((el, id) => {
-        return (
-          <section
-            style={el.bgType === 'color' ? { background: el.bg } : null}
-            className="mainPageSection"
-            key={el._id}
-            id={el.id}
-          >
-            {el.bgType === 'video' && (
-              <video className={classes.bgVideoPlayer} autoPlay muted loop>
-                <source src={el.bg} type="video/mp4" />
-              </video>
-            )}
-            {el.bgType === 'image' && (
-              <img
-                className={classes.bgVideoPlayer}
-                draggable={false}
-                src={el.bg}
-                alt="Background"
-              />
-            )}
-            <div style={{ zIndex: 10 }}>
-              <div>
-                <img height="200" src={el.img} alt={el.title} />{' '}
-              </div>
-              <div className="changeableFlex">
-                {' '}
-                {el.logo && <img height="200" src={el.logo} alt="logo" />}{' '}
-                <div> {ReactHtmlParser(el.desc)}</div>
-              </div>
-            </div>
-          </section>
-        );
-      })}
-    </div>
-  );
-};
 
 const Mainpage = _ => {
   const [params] = React.useState(_.params);
@@ -134,13 +87,10 @@ const Mainpage = _ => {
                   />
                 )}
                 <div style={{ zIndex: 10 }}>
-                  <div>
-                    <img height="200" src={el.img} alt={el.title} />{' '}
-                  </div>
                   <div className="changeableFlex">
                     {' '}
                     {el.logo && (
-                      <img height="200" src={el.logo} alt="logo" />
+                      <img height="210" src={el.logo} alt="logo" />
                     )}{' '}
                     <div> {ReactHtmlParser(el.desc)}</div>
                   </div>
@@ -154,17 +104,4 @@ const Mainpage = _ => {
   );
 };
 
-export default withRouter(_ => {
-  const [wWidth, setwWidth] = useState(window.innerWidth);
-  const foo = e => {
-    setwWidth(window.innerWidth);
-  };
-  useEffect(() => {
-    window.mMatchMedia.addListener(foo);
-    return () => {
-      window.mMatchMedia.removeListener(foo);
-    };
-  }, []);
-
-  return wWidth > 724 ? <Mainpage {..._} /> : <__Mainpage {..._} />;
-});
+export default withRouter(Mainpage);

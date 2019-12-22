@@ -40,15 +40,8 @@ const storage = multer.diskStorage({
 
 const decodeJWT = require('./helpers/decodeJWT'),
   fidnUser = require('./helpers/findUser'),
-  setAboutus = require('./helpers/pages/aboutus').set,
-  getAboutus = require('./helpers/pages/aboutus').get,
-  setServices = require('./helpers/pages/services').set,
-  getServices = require('./helpers/pages/services').get,
-  addServices = require('./helpers/pages/services').addService,
-  removeServices = require('./helpers/pages/services').removeService,
-  editServices = require('./helpers/pages/services').editService,
-  portfolio = require('./helpers/pages/portfolio'),
   getPages = require('./helpers/pages/get'),
+  getSinglePage = require('./helpers/pages/get').single,
   addPages = require('./helpers/addPage'),
   removePage = require('./helpers/addPage').removePage,
   editPage = require('./helpers/addPage').editPage,
@@ -130,6 +123,7 @@ app.post('/logout', (req, res) => {
 
 app.post('/api/addpage', upload.any(), addPages);
 app.get('/api/get', getPages);
+app.get('/api/getSingle', getSinglePage);
 app.post('/api/addContent', upload.single('file'), addContent);
 app.post('/api/removeContent', upload.none(), removeContent);
 app.post('/api/removePage', upload.none(), removePage);

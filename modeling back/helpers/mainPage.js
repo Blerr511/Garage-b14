@@ -1,5 +1,5 @@
 const MainItem = require('../mongoose/Schemas').MainItem;
-const fs = require('fs');
+const rmf = require('./mFs').rmf;
 const mongoose = require('mongoose');
 module.exports.get = async (req, res) => {
   const mainItem = await MainItem.find({});
@@ -42,13 +42,8 @@ module.exports.add = async (req, res) => {
     }
     mainItem.save(err => {
       if (err) {
-        if (mainItem.logo)
-          fs.unlink(mainItem.logo, err => {
-            if (err) console.error(err);
-          });
-        fs.unlink(mainItem.bg, err => {
-          if (err) console.error(err);
-        });
+        if (mainItem.logo) rmf(mainItem.logo);
+        rmf(mainItem.bg);
         throw err;
       } else {
         res.status(200).send({ code: 200, message: 'New Item saved' });
@@ -83,13 +78,8 @@ module.exports.remove = async (req, res) => {
     return false;
   }
   const mainItem = await MainItem.findOne({ _id: _id });
-  if (mainItem.logo)
-    fs.unlink(mainItem.logo, err => {
-      if (err) console.error(err);
-    });
-  fs.unlink(mainItem.bg, err => {
-    if (err) console.error(err);
-  });
+  if (mainItem.logo) rmf(mainItem.logo);
+  rmf(mainItem.bg);
   const result = await MainItem.deleteOne({ _id: _id });
   res
     .status(result.deletedCount === 0 ? 400 : 200)

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const fs = require('fs');
+const rmf = require('./mFs').rmf;
 const { Service, Page } = require('../mongoose/Schemas');
 
 module.exports.add = async (req, res) => {
@@ -35,28 +35,21 @@ module.exports.add = async (req, res) => {
 
 module.exports.remove = async (req, res) => {
   const { pageId, contentId } = req.body;
+  const response = {};
+  const tPage = await Page.findOne({ _id: pageId });
+  let u;
   if (typeof contentId === 'string') {
-    Page.findOne({ _id: pageId }, (err, doc) => {
-      if (!err) {
-        try {
-          for (let i = 0; i < doc.content.length; i++) {
-            if (
-              JSON.stringify(doc.content[i]._id) == JSON.stringify(contentId)
-            ) {
-              fs.unlink(doc.content[i].img, err => {
-                if (err) console.error(err);
-              });
-              break;
-            }
-          }
-        } catch (err) {
-          console.error(err);
+    if (tPage) {
+      for (let i = 0; i < tPage.content.length; i++) {
+        if (
+          JSON.stringify(tPage.content[i]._id) === JSON.stringify(contentId)
+        ) {
+          rmf(tPage.content[i].img);
+          break;
         }
-      } else {
-        console.error(err);
       }
-    });
-    const u = await Page.updateOne(
+    }
+    u = await Page.updateOne(
       { _id: pageId },
       {
         $pull: {
@@ -64,17 +57,36 @@ module.exports.remove = async (req, res) => {
         }
       }
     );
-
-    const response = {};
-    if (u.ok === 1) {
-      response.code = 200;
-      response.message = 'Content element removed !';
-      const page = await Page.findOne({ _id: pageId });
-      response.data = page;
-    } else {
-      response.code = 400;
-      response.message = 'Somthing goes wrong !';
+  } else if (contentId instanceof Array) {
+    for (let i = 0; i < tPage.content.length; i++) {
+      for (let j = 0; j < contentId.length; j++) {
+        if (
+          JSON.stringify(tPage.content[i]._id) === JSON.stringify(contentId[j])
+        ) {
+          rmf(tPage.content[i].img);
+          break;
+        }
+      }
     }
-    res.status(response.code).send(response);
+    u = await Page.updateOne(
+      { _id: pageId },
+      {
+        $pull: {
+          content: {
+            _id: { $in: contentId.map(el => new mongoose.Types.ObjectId(el)) }
+          }
+        }
+      }
+    );
   }
+  if (u.ok === 1) {
+    response.code = 200;
+    response.message = 'Content element removed !';
+    const page = await Page.findOne({ _id: pageId });
+    response.data = page;
+  } else {
+    response.code = 400;
+    response.message = 'Somthing goes wrong !';
+  }
+  res.status(response.code).send(response);
 };

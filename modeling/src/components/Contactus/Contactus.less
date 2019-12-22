@@ -39,10 +39,14 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+
     > div {
       margin: 20px 0;
       display: flex;
       justify-content: space-between;
+      > div:first-of-type {
+        max-width: 60%;
+      }
       > div {
         display: flex;
         flex-direction: column;
@@ -90,4 +94,17 @@
   display: inline-block;
   width: 30px;
   height: 30px;
+}
+
+@media only screen and (max-width: 724px) {
+  .contactus {
+    > div {
+      > div {
+        flex-direction: column !important;
+        > div {
+          max-width: 100% !important;
+        }
+      }
+    }
+  }
 }

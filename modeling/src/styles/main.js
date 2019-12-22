@@ -8,6 +8,16 @@ export const styles = makeStyles(theme => ({
     height: '100%',
     width: '100%'
   },
+  twixGrid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gridTemplateRows: 'auto'
+  },
+  solid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr',
+    gridTemplateRows: 'auto'
+  },
   errorText: {
     padding: '10px 20px',
     marginBottom: '20px',
@@ -60,7 +70,7 @@ export const styles = makeStyles(theme => ({
     width: '100vw',
     height: '100vh',
     objectFit: 'cover',
-    position: 'absolute',
+    position: 'fixed',
     top: 0,
     left: 0,
     zIndex: 0,
@@ -119,8 +129,16 @@ export const styles = makeStyles(theme => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    margin: '3px'
   },
+  cardStandard: {
+    position: 'relative',
+    width: '200px',
+    height: '200px',
+    margin: '3px'
+  },
+
   selectInput: {
     minWidth: '100px',
     margin: '15px 0'

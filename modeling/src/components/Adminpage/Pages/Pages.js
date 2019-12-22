@@ -37,13 +37,16 @@ import {
   faPlusSquare,
   faTimesCircle,
   faPen,
-  faTimes
+  faTimes,
+  faMinus,
+  faEye
 } from '@fortawesome/free-solid-svg-icons';
 
 import { createUrl, placeholderTestUrl } from '../../../methods/createUrl';
 
 import './Pages.less';
 import { useRef } from 'react';
+import PortfolioContent from './PortfolioContent';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -92,6 +95,7 @@ function VerticalTabs(props) {
   const contentDescRef = useRef();
   const contentFileRef = useRef();
   const wrapperRef = useRef(null);
+  const [showPortfolioItems, setShowPortfolioItems] = useState(false);
   const bgChangeInputFileRef = useRef();
   useOutsideAlerter(wrapperRef);
 
@@ -135,6 +139,8 @@ function VerticalTabs(props) {
     contentTitleRef.current.value = '';
     contentDescRef.current.value = '';
     contentFileRef.current.value = '';
+    props.setRoute('/');
+    props.setRoute(tempPages[i].title.replace(/\ /g, '_'));
     setExpanded(false);
   };
   const editPageHundler = _id => {
@@ -369,8 +375,15 @@ function VerticalTabs(props) {
             </div>
             <div>
               {el.style.template === 'template3' ? (
-                <div className={classes.flexWrap}>
-                  {' '}
+                <div>
+                  {
+                    <PortfolioContent
+                      removeContentHundler={props.removeContentHundler}
+                      pageId={el._id}
+                      open={showPortfolioItems}
+                      onClose={() => setShowPortfolioItems(false)}
+                    />
+                  }
                   {portfolioDialog ? (
                     <Dialog
                       open={portfolioDialog}
@@ -419,17 +432,30 @@ function VerticalTabs(props) {
                       </DialogActions>
                     </Dialog>
                   ) : null}
-                  <Card
-                    onClick={() => setPortfolioDialog(true)}
-                    className={classes.card}
-                  >
-                    <CardContent>
-                      <FontAwesomeIcon
-                        icon={faPlusSquare}
-                        style={{ fontSize: '40px' }}
-                      />
-                    </CardContent>
-                  </Card>
+                  <div style={{ display: 'flex' }}>
+                    <Card
+                      onClick={() => setShowPortfolioItems(true)}
+                      className={classes.card}
+                    >
+                      <CardContent>
+                        <FontAwesomeIcon
+                          icon={faEye}
+                          style={{ fontSize: '40px' }}
+                        />
+                      </CardContent>
+                    </Card>
+                    <Card
+                      onClick={() => setPortfolioDialog(true)}
+                      className={classes.card}
+                    >
+                      <CardContent>
+                        <FontAwesomeIcon
+                          icon={faPlusSquare}
+                          style={{ fontSize: '40px' }}
+                        />
+                      </CardContent>
+                    </Card>
+                  </div>
                 </div>
               ) : el.style.template === 'template2' ? (
                 el.content.map(el => {
@@ -547,9 +573,7 @@ function VerticalTabs(props) {
                   </ExpansionPanelDetails>
                 </ExpansionPanel>
               ) : null}
-              {el.style.template === 'template3' ? (
-                <div className={classes.flexWrap}></div>
-              ) : null}
+
               <div
                 style={{
                   display: 'flex',
@@ -579,7 +603,11 @@ function VerticalTabs(props) {
                 <Fab
                   aria-label="Delete"
                   color="secondary"
-                  onClick={_ => props.removePage(p._id)}
+                  onClick={_ => {
+                    props
+                      .removePage(p._id)
+                      .then(_ => value > 0 && setValue(value - 1));
+                  }}
                 >
                   <FontAwesomeIcon icon={faTimes} />{' '}
                 </Fab>
@@ -594,7 +622,7 @@ function VerticalTabs(props) {
 const Pages = () => {
   const classes = useStyles();
   const [pages, setPages] = useState({ count: 0, data: [] });
-
+  const [demo, setDemo] = useState(window.innerWidth > 724);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({
     type: 'success',
@@ -675,66 +703,70 @@ const Pages = () => {
         setLoading(false);
       });
   };
-  const removeContentHundler = (pageId, contentId) => {
-    const body = new FormData();
-    body.append('pageId', pageId);
-    body.append('contentId', contentId);
-    setLoading(true);
+  const removeContentHundler = async (pageId, contentId) => {
+    try {
+      const body = new FormData();
+      body.append('pageId', pageId);
+      body.append('contentId', contentId);
+      setLoading(true);
 
-    fetch(`${process.env.SERVER}/api/removeContent`, {
-      method: 'POST',
-      body: body
-    })
-      .then(_ => _.json())
-      .then(data => {
-        setLoading(false);
-        for (let i = 0; i < pages.data.length; i++) {
-          if (data.data._id === pages.data[i]._id) {
-            const temp = pages.data;
-            temp[i] = data.data;
-            setPages({ count: pages.count, data: temp });
-            setMessage({ type: 'success', text: data.message, open: true });
-            break;
-          }
+      let data = await fetch(`${process.env.SERVER}/api/removeContent`, {
+        method: 'POST',
+        body: body
+      });
+      data = await data.json();
+      setLoading(false);
+      setRoute('/');
+      for (let i = 0; i < pages.data.length; i++) {
+        if (data.data._id === pages.data[i]._id) {
+          const temp = pages.data;
+          temp[i] = data.data;
+          setPages({ count: pages.count, data: temp });
+          setMessage({ type: 'success', text: data.message, open: true });
+          break;
         }
-      })
-      .catch(err => {
-        if (err)
-          var text =
-            typeof err === 'string'
-              ? err
-              : typeof err.message === 'string'
-              ? err.message
-              : 'Somthing goes wrong .';
-        setMessage({ type: 'error', text: text, open: true });
-        setLoading(false);
-      });
+      }
+      return true;
+    } catch (err) {
+      if (err)
+        var text =
+          typeof err === 'string'
+            ? err
+            : typeof err.message === 'string'
+            ? err.message
+            : 'Somthing goes wrong .';
+      setMessage({ type: 'error', text: text, open: true });
+      setLoading(false);
+      return false;
+    }
   };
-  const removePage = pageId => {
-    const formData = new FormData();
-    formData.append('pageId', pageId);
-    setLoading(true);
-    fetch(`${process.env.SERVER}/api/removePage`, {
-      method: 'POST',
-      body: formData
-    })
-      .then(_ => _.json())
-      .then(data => {
-        setLoading(false);
-        setMessage({ type: 'success', text: data.message, open: true });
-        getPages();
-      })
-      .catch(err => {
-        if (err)
-          var text =
-            typeof err === 'string'
-              ? err
-              : typeof err.message === 'string'
-              ? err.message
-              : 'Somthing goes wrong .';
-        setMessage({ type: 'error', text: text, open: true });
-        setLoading(false);
+  const removePage = async pageId => {
+    try {
+      const formData = new FormData();
+      formData.append('pageId', pageId);
+      setLoading(true);
+      let data = await fetch(`${process.env.SERVER}/api/removePage`, {
+        method: 'POST',
+        body: formData
       });
+      data = await data.json();
+
+      setLoading(false);
+      setMessage({ type: 'success', text: data.message, open: true });
+      getPages();
+      return true;
+    } catch (err) {
+      if (err)
+        var text =
+          typeof err === 'string'
+            ? err
+            : typeof err.message === 'string'
+            ? err.message
+            : 'Somthing goes wrong .';
+      setMessage({ type: 'error', text: text, open: true });
+      setLoading(false);
+      return false;
+    }
   };
   const editPageHundler = async (pageId, payload) => {
     const formData = new FormData();
@@ -792,13 +824,7 @@ const Pages = () => {
         timer={3000}
         message={message.text}
       />{' '}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gridTemplateRows: 'auto'
-        }}
-      >
+      <div className={demo ? classes.twixGrid : classes.solid}>
         <VerticalTabs
           addContentHundler={addContentHundler}
           removeContentHundler={removeContentHundler}
@@ -808,7 +834,18 @@ const Pages = () => {
           setRoute={setRoute}
           count={pages.count}
         />
-        <Demo route={route}></Demo>
+        <Fab
+          color={demo ? 'secondary' : 'primary'}
+          style={{ position: 'absolute', top: '5px', right: '5px' }}
+          onClick={_ => setDemo(!demo)}
+        >
+          {' '}
+          <FontAwesomeIcon
+            icon={demo ? faTimes : faMinus}
+            style={{ color: 'white' }}
+          />
+        </Fab>
+        {demo && <Demo route={route}></Demo>}
       </div>
     </div>
   );

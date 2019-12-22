@@ -53,7 +53,7 @@ const Mail = () => {
 
   useEffect(() => {
     getMails();
-    let interval = setInterval(() => getMails(), 180000);
+    let interval = setInterval(() => getMails(), 30000);
     return () => {
       clearInterval(interval);
     };
