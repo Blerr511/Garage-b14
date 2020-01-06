@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Message from '../Message/Message';
+import ReactHtmlParser from 'react-html-parser';
 
 import PropTypes from 'prop-types';
 import { styles as useStyles } from '../../../styles/main';
@@ -24,7 +25,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
-import IconButton from '@material-ui/core/IconButton';
 import Fab from '@material-ui/core/Fab';
 import Demo from '../Demo/Demo';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -35,7 +35,6 @@ import {
   faSave,
   faTrash,
   faPlusSquare,
-  faTimesCircle,
   faPen,
   faTimes,
   faMinus,
@@ -86,6 +85,11 @@ function VerticalTabs(props) {
     props.setRoute(pages[newValue].title.replace(/\ /g, '_'));
   };
   const [editable, setEditable] = useState(false);
+  const [contentEditable, setContentEditable] = useState(false);
+  const contentEditTitle = useRef();
+  const contentEditDesc = useRef();
+  const contentEditLogo = useRef();
+
   const [saveLoading, setSaveLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [colorChange, setColorChange] = useState(false);
@@ -140,7 +144,11 @@ function VerticalTabs(props) {
     contentDescRef.current.value = '';
     contentFileRef.current.value = '';
     props.setRoute('/');
-    props.setRoute(tempPages[i].title.replace(/\ /g, '_'));
+    for (let i = 0; i < tempPages.length; i++) {
+      if (tempPages[i]._id === pageId) {
+        props.setRoute(tempPages[i].title.replace(/\ /g, '_'));
+      }
+    }
     setExpanded(false);
   };
   const editPageHundler = _id => {
@@ -148,7 +156,13 @@ function VerticalTabs(props) {
       if (_id === tempPages[i]._id) {
         setSaveLoading(true);
         props
-          .editPageHundler(_id, tempPages[i])
+          .editPageHundler(
+            _id,
+            tempPages[i],
+            tempPages[i].style.bg.type !== 'color'
+              ? bgChangeInputFileRef.current.files[0]
+              : bg
+          )
           .then(_ => {
             setSaveLoading(false);
             props.setRoute('/');
@@ -159,6 +173,15 @@ function VerticalTabs(props) {
         break;
       }
     }
+  };
+  const contentEditHandler = _id => {
+    props.contentEditHandler(
+      _id,
+      contentEditTitle.current.value,
+      contentEditDesc.current.editor.getContent(),
+      contentEditLogo.current.files[0]
+    );
+    setContentEditable(false);
   };
 
   function hexToRgb(h) {
@@ -259,9 +282,9 @@ function VerticalTabs(props) {
                 init={{
                   // selector: 'textarea#full-featured',
                   plugins:
-                    ' preview powerpaste casechange autolink  directionality advcode visualblocks visualchars fullscreen  link  table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists checklist wordcount tinymcespellchecker a11ychecker  textpattern noneditable  formatpainter permanentpen  charmap mentions  linkchecker emoticons',
+                    ' preview autolink  directionality visualblocks visualchars fullscreen  link  table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount textpattern noneditable charmap emoticons',
                   toolbar:
-                    'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons  |   pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
+                    'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons  |   pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
                   template_cdate_format:
                     '[Date Created (CDATE): %m/%d/%Y : %H:%M:%S]',
                   template_mdate_format:
@@ -332,46 +355,34 @@ function VerticalTabs(props) {
                     </div>
                   ) : null}
                 </div>
-              ) : el.style.bg.type === 'image' ? (
-                <Card className={classes.card}>
-                  <input
-                    type="file"
-                    style={{ display: 'none' }}
-                    ref={bgChangeInputFileRef}
-                    onChange={_ => {
-                      hundelPageInputEdit(
-                        {
-                          bg: _.target.files[0],
-                          type: 'image'
-                        },
-                        p._id
-                      );
-                      setNewBg(createUrl(_.target.files[0]));
-                    }}
-                  />
-                  <CardMedia
-                    className={classes.media}
-                    image={newBg || el.style.bg.val || placeholderTestUrl}
-                  />
-                  {editable ? (
-                    <IconButton
-                      className={classes.absTR}
-                      onClick={_ => {
-                        bgChangeInputFileRef.current.click();
-                      }}
-                      aria-label="settings"
-                    >
-                      <FontAwesomeIcon
-                        icon={faPen}
-                        style={{
-                          fontSize: '18px',
-                          color: '#fff'
-                        }}
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                  <Card className={classes.card}>
+                    {el.style.bg.type === 'image' ? (
+                      <CardMedia
+                        className={classes.media}
+                        image={newBg || el.style.bg.val || placeholderTestUrl}
                       />
-                    </IconButton>
-                  ) : null}
-                </Card>
-              ) : null}
+                    ) : (
+                      <video
+                        className={classes.miniVideoBg}
+                        autoPlay
+                        muted
+                        loop
+                      >
+                        <source src={el.style.bg.val} type="video/mp4" />
+                      </video>
+                    )}
+                  </Card>
+                  {editable === el._id && (
+                    <input
+                      type="file"
+                      ref={bgChangeInputFileRef}
+                      onChange={_ => {}}
+                    />
+                  )}
+                </div>
+              )}
             </div>
             <div>
               {el.style.template === 'template3' ? (
@@ -477,36 +488,103 @@ function VerticalTabs(props) {
                             label="Title"
                             defaultValue={el.title}
                             className={classes.textField}
+                            inputRef={contentEditTitle}
                             margin="normal"
+                            disabled={contentEditable !== el._id}
                             InputProps={{
-                              readOnly: !editable
+                              readOnly: contentEditable !== el._id
                             }}
                           />
-                          <TextField
+                          {/* <TextField
                             id="standard-read-only-input"
                             label="Description"
                             defaultValue={el.desc}
                             className={classes.textField}
                             margin="normal"
                             fullWidth
+                            disabled={contentEditable !== el._id}
                             InputProps={{
-                              readOnly: !editable
+                              readOnly: contentEditable !== el._id
                             }}
-                          />
+                          /> */}
+                          {contentEditable === el._id ? (
+                            <Editor
+                              apiKey={process.env.TINYAPIKEY}
+                              initialValue={el.desc}
+                              cloudChannel="5-stable"
+                              init={{
+                                // selector: 'textarea#full-featured',
+                                plugins:
+                                  ' preview autolink  directionality visualblocks visualchars fullscreen  link  table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount textpattern noneditable charmap emoticons',
+                                toolbar:
+                                  'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons  |   pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
+                                template_cdate_format:
+                                  '[Date Created (CDATE): %m/%d/%Y : %H:%M:%S]',
+                                template_mdate_format:
+                                  '[Date Modified (MDATE): %m/%d/%Y : %H:%M:%S]',
+                                height: 250,
+                                quickbars_selection_toolbar:
+                                  'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
+                                noneditable_noneditable_class: 'mceNonEditable',
+                                toolbar_drawer: 'sliding',
+                                spellchecker_dialog: true,
+                                spellchecker_whitelist: ['Ephox', 'Moxiecode'],
+                                tinycomments_mode: 'embedded',
+                                menubar: false,
+                                content_style: '.mymention{ color: gray; }',
+                                contextmenu: 'link',
+                                mentions_selector: '.mymention'
+                              }}
+                              ref={contentEditDesc}
+                            />
+                          ) : (
+                            ReactHtmlParser(el.desc)
+                          )}
                           {el.img ? (
                             <img height={100} src={el.img} alt={el.title} />
                           ) : null}
+                          {'Logo: '}
+                          {contentEditable === el._id && (
+                            <input
+                              accept="image/png, image/jpeg"
+                              type="file"
+                              ref={contentEditLogo}
+                            />
+                          )}
                         </div>
-                        <Button
-                          onClick={_ =>
-                            props.removeContentHundler(p._id, el._id)
-                          }
-                          variant="contained"
-                          color="secondary"
-                          startIcon={<FontAwesomeIcon icon={faTrash} />}
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-around',
+                            marginTop: '15px'
+                          }}
                         >
-                          Delete
-                        </Button>
+                          <Button
+                            variant="contained"
+                            color={
+                              contentEditable === el._id ? 'primary' : 'default'
+                            }
+                            onClick={_ => {
+                              if (contentEditable === el._id) {
+                                return contentEditHandler(el._id);
+                              }
+                              setContentEditable(el._id);
+                            }}
+                          >
+                            {contentEditable === el._id ? 'Save' : 'Edit'}
+                          </Button>
+
+                          <Button
+                            onClick={_ =>
+                              props.removeContentHundler(p._id, el._id)
+                            }
+                            variant="contained"
+                            color="secondary"
+                            startIcon={<FontAwesomeIcon icon={faTrash} />}
+                          >
+                            Delete
+                          </Button>
+                        </div>
                       </ExpansionPanelDetails>
                     </ExpansionPanel>
                   );
@@ -587,7 +665,7 @@ function VerticalTabs(props) {
                     if (editable) {
                       editPageHundler(p._id);
                     }
-                    setEditable(!editable);
+                    setEditable(editable ? false : el._id);
                   }}
                   style={{ marginRight: '15px' }}
                   color={editable ? 'inherit' : 'primary'}
@@ -644,7 +722,7 @@ const Pages = () => {
       );
 
       const data = await res.json();
-
+      if (!route) setRoute(data.data[0].title);
       return setPages(data);
     } catch (err) {
       if (err)
@@ -768,15 +846,17 @@ const Pages = () => {
       return false;
     }
   };
-  const editPageHundler = async (pageId, payload) => {
+  const editPageHundler = async (pageId, payload, bg) => {
+    console.log(bg);
     const formData = new FormData();
     formData.append('pageId', pageId);
     if (payload.title) formData.append('title', payload.title);
 
     formData.append('desc', window.tinyMCE.get(pageId).getContent());
-    if (payload.bg) {
-      formData.append('bg', payload.bg);
-      formData.append('bgType', payload.type);
+    if (bg) {
+      formData.append('bg', bg);
+      if (bg instanceof File) formData.append('bgType', 'file');
+      if (typeof bg === 'string') formData.append('bgType', 'color');
     }
     try {
       let data = await fetch(`${process.env.SERVER}/api/editPage`, {
@@ -800,6 +880,39 @@ const Pages = () => {
       setLoading(false);
     }
   };
+
+  const contentEditHandler = async (_id, title, desc, logo) => {
+    try {
+      const formData = new FormData();
+      formData.append('contentId', _id);
+      if (desc) formData.append('desc', desc);
+      if (title) formData.append('title', title);
+      if (logo) formData.append('logo', logo);
+
+      let data = await fetch(`${process.env.SERVER}/api/editContent`, {
+        method: 'POST',
+        body: formData
+      });
+      data = await data.json();
+
+      getPages();
+      const TRoute = route;
+      setRoute(() => '/');
+      console.log(TRoute);
+      setRoute(() => TRoute);
+    } catch (err) {
+      if (err)
+        var text =
+          typeof err === 'string'
+            ? err
+            : typeof err.message === 'string'
+            ? err.message
+            : 'Somthing goes wrong .';
+      else var text = 'Somthing  goes wrong .';
+      setMessage({ type: 'error', text: text, open: true });
+    }
+  };
+
   const [route, setRoute] = React.useState('');
   return (
     <div>
@@ -828,6 +941,7 @@ const Pages = () => {
         <VerticalTabs
           addContentHundler={addContentHundler}
           removeContentHundler={removeContentHundler}
+          contentEditHandler={contentEditHandler}
           removePage={removePage}
           editPageHundler={editPageHundler}
           pages={pages.data}

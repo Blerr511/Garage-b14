@@ -1,10 +1,6 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
-
-import Sidebar from './Sidebar/Sidebar';
 import Login from '../Login/Login';
-import { routes as _routes } from './routes';
-import Message from './Message/Message';
+// import { routes as _routes } from './routes';
 import './Adminpage.less';
 
 class Adminpage extends Component {
@@ -21,7 +17,8 @@ class Adminpage extends Component {
         open: false,
         text: '',
         type: 'success'
-      }
+      },
+      component: <div></div>
     };
     this.setAdminState = this.setAdminState.bind(this);
     this.login = this.login.bind(this);
@@ -32,6 +29,32 @@ class Adminpage extends Component {
   }
   componentDidMount() {
     this.login(null);
+    const Sidebar = require('./Sidebar/Sidebar').default;
+    const _routes = require('./routes').routes;
+    const routes = _routes.routes;
+    const path = _routes.path;
+    const { BrowserRouter, Switch, Route } = require('react-router-dom');
+    this.setState({
+      component: (
+        <div className="adminpage">
+          <BrowserRouter>
+            <Sidebar routes={_routes} setAdminState={this.setAdminState} />
+            <Switch>
+              {routes[0] && (
+                <Route path={`${path}`} exact component={routes[0].component} />
+              )}
+              {routes.map(el => (
+                <Route
+                  key={el.route}
+                  path={`${path}${el.route}`}
+                  component={el.component}
+                />
+              ))}
+            </Switch>
+          </BrowserRouter>
+        </div>
+      )
+    });
   }
   closeMessage() {
     this.setState({
@@ -82,26 +105,9 @@ class Adminpage extends Component {
       });
   }
   render() {
-    const { routes, path } = _routes;
     const { message } = this.state;
     return this.state.logged ? (
-      <div className="adminpage">
-        <Router>
-          <Sidebar routes={_routes} setAdminState={this.setAdminState} />
-          <Switch>
-            {routes[0] && (
-              <Route path={`${path}`} exact component={routes[0].component} />
-            )}
-            {routes.map(el => (
-              <Route
-                key={el.route}
-                path={`${path}${el.route}`}
-                component={el.component}
-              />
-            ))}
-          </Switch>
-        </Router>
-      </div>
+      this.state.component
     ) : (
       <Login
         closeMessage={this.closeMessage}

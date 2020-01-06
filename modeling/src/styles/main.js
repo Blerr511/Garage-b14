@@ -8,6 +8,12 @@ export const styles = makeStyles(theme => ({
     height: '100%',
     width: '100%'
   },
+  miniVideoBg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    position: 'absolute'
+  },
   twixGrid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
@@ -16,7 +22,8 @@ export const styles = makeStyles(theme => ({
   solid: {
     display: 'grid',
     gridTemplateColumns: '1fr',
-    gridTemplateRows: 'auto'
+    gridTemplateRows: 'auto',
+    minHeight: '100vh'
   },
   errorText: {
     padding: '10px 20px',

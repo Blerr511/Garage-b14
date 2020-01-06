@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useRef, useMemo } from 'react';
 import { withRouter } from 'react-router-dom';
-import Fab from '@material-ui/core/Fab';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMinus } from '@fortawesome/free-solid-svg-icons';
 import './Demo.less';
 
 const Demo = props => {
+  const ref = useRef();
+  useMemo(() => {
+    if (ref.current) ref.current.src = ref.current.src;
+  }, [props.reset]);
   return (
     <div style={{ width: '100%', height: '100vh' }}>
       <iframe
+        ref={ref}
         style={{ width: '100%', height: '100vh' }}
         src={`${window.location.origin}/${props.route}`}
         frameBorder="0"

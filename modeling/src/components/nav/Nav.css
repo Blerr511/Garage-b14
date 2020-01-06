@@ -20,7 +20,7 @@
   border: none;
   background: transparent;
   outline: none;
-  color: #fff !important;
+  color: #fff;
   font-size: 18px;
   padding: 8px 12px;
   margin: 5px;
@@ -29,7 +29,11 @@
   white-space: nowrap;
   cursor: pointer;
 }
-.navbar ul li #services {
+.navbar ul li a:hover {
+  background-color: #ffe15f !important;
+  color: black !important;
+}
+.navbar ul li .active {
   background-color: #ffe15f !important;
   color: black !important;
 }

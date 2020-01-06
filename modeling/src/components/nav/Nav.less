@@ -21,7 +21,7 @@
         border: none;
         background: transparent;
         outline: none;
-        color: #fff !important;
+        color: #fff;
         font-size: 18px;
         padding: 8px 12px;
         margin: 5px;
@@ -30,7 +30,11 @@
         white-space: nowrap;
         cursor: pointer;
       }
-      #services {
+      a:hover {
+        background-color: @activeLinkColor!important;
+        color: black !important;
+      }
+      .active {
         background-color: @activeLinkColor!important;
         color: black !important;
       }

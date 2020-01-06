@@ -137,21 +137,38 @@ const Contactus = () => {
                 )
               }
             >
-              Send
+              SEND
             </button>
           </div>
         </div>
-        <div>
+        <table>
+          <tbody>
+            {(state.contacts.length > state.address.length
+              ? state.contacts
+              : state.address
+            ).map((el, id) => {
+              return (
+                <tr key={el._id}>
+                  <td>
+                    {state.contacts[id] && (
+                      <span>{state.address[id].text}</span>
+                    )}
+                  </td>
+                  <td>
+                    {state.address[id] && (
+                      <span className="address">{state.address[id].text}</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {/* <div>
           <div>
             {state.contacts.map(el => (
               <span key={el._id}>{el.text}</span>
             ))}
-            <footer>
-              <span>
-                {' '}
-                Garage B14 studios {getYear(2019)}, All rights reserved
-              </span>
-            </footer>
           </div>
           <div>
             {state.address.map(el => (
@@ -160,7 +177,15 @@ const Contactus = () => {
               </span>
             ))}
           </div>
-        </div>
+        </div> */}
+        <footer>
+          <span>
+            <span>
+              {' '}
+              Garage B14 studios {getYear(2019)}, All rights reserved
+            </span>
+          </span>
+        </footer>
       </div>
     </div>
   );

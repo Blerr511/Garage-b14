@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 mongoose.connect(
-  'mongodb://localhost/modeling',
+  process.env.DB_CONNECTION_STRING,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,

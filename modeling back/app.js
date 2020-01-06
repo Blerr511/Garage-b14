@@ -47,8 +47,10 @@ const decodeJWT = require('./helpers/decodeJWT'),
   editPage = require('./helpers/addPage').editPage,
   addContent = require('./helpers/contentHundlers').add,
   removeContent = require('./helpers/contentHundlers').remove,
+  editContent = require('./helpers/contentHundlers').edit,
   getMainItem = require('./helpers/mainPage').get,
   addMainItem = require('./helpers/mainPage').add,
+  editMainItem = require('./helpers/mainPage').edit,
   removeMainItem = require('./helpers/mainPage').remove,
   addSoclink = require('./helpers/soclinks').add,
   editSoclink = require('./helpers/soclinks').edit,
@@ -128,10 +130,12 @@ app.post('/api/addContent', upload.single('file'), addContent);
 app.post('/api/removeContent', upload.none(), removeContent);
 app.post('/api/removePage', upload.none(), removePage);
 app.post('/api/editPage', upload.single('bg'), editPage);
+app.post('/api/editContent', upload.single('logo'), editContent);
 
 app.get('/api/mainItems', getMainItem);
 app.post('/api/mainItems/add', upload.any(), addMainItem);
 app.post('/api/mainItems/rm', upload.none(), removeMainItem);
+app.post('/api/mainItems/edit', upload.any(), editMainItem);
 
 app.get('/api/soclinks', getSoclinks);
 app.post('/api/soclinks/add', upload.none(), addSoclink);

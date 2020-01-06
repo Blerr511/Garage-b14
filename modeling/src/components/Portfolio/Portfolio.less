@@ -13,3 +13,31 @@
     }
   }
 }
+
+.fading {
+  animation-name: fading;
+  animation-duration: 500ms;
+}
+
+.showing {
+  animation-name: showing;
+  animation-duration: 500ms;
+}
+
+@keyframes fading {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes showing {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

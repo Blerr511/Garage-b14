@@ -48,6 +48,9 @@ const Mainpage = _ => {
     }
     return false;
   };
+  const goToServices = _ => {
+    pushHistory('/services#' + _);
+  };
 
   return (
     <div
@@ -72,6 +75,7 @@ const Mainpage = _ => {
                 style={el.bgType === 'color' ? { background: el.bg } : null}
                 className="mainPageSection"
                 id={el.id}
+                onClick={_ => goToServices(el.goTo)}
               >
                 {el.bgType === 'video' && (
                   <video className={classes.bgVideoPlayer} autoPlay muted loop>
@@ -87,11 +91,8 @@ const Mainpage = _ => {
                   />
                 )}
                 <div style={{ zIndex: 10 }}>
-                  <div className="changeableFlex">
-                    {' '}
-                    {el.logo && (
-                      <img height="210" src={el.logo} alt="logo" />
-                    )}{' '}
+                  <div className="changeableFlex" style={{ cursor: 'pointer' }}>
+                    {el.logo && <img height="210" src={el.logo} alt="logo" />}
                     <div> {ReactHtmlParser(el.desc)}</div>
                   </div>
                 </div>

@@ -1,9 +1,10 @@
 const { Page, Service } = require('../mongoose/Schemas');
+const mongoose = require('mongoose');
 const rmf = require('./mFs').rmf;
 const clgErr = err => {
   if (err) console.error(err);
 };
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const { title, template, desc } = req.body;
   let bgtype = req.body.bgtype;
   const { contentTitle, contentDesc } = req.body;
@@ -24,27 +25,27 @@ module.exports = (req, res) => {
     const content = [];
     if (contentTitle && contentTitle instanceof Array)
       for (let i = 0; i < contentTitle.length; i++) {
-        content.push(
-          new Service({
-            title: contentTitle[i],
-            desc: contentDesc[i],
-            img: files.content[i]
-          })
-        );
+        const service = new Service({
+          title: contentTitle[i] ? contentTitle[i] : '',
+          desc: contentDesc[i] ? contentDesc[i] : '',
+          img: files.content[i]
+        });
+        await service.save(clgErr);
+        content.push(service._id);
       }
     else if (contentTitle && !(contentTitle instanceof Array)) {
-      content.push(
-        new Service({
-          title: contentTitle,
-          desc: contentDesc,
-          img: files.content[0]
-        })
-      );
+      const service = new Service({
+        title: contentTitle ? contentTitle : '',
+        desc: contentDesc ? contentDesc : '',
+        img: files.content[0]
+      });
+      await service.save(clgErr);
+      content.push(service._id);
     }
     const route = title.replace(' ', '_');
     const page = new Page({
       title: title,
-      desc: desc,
+      desc: desc ? desc : '',
       style: {
         template: template,
         bg: {
@@ -55,9 +56,10 @@ module.exports = (req, res) => {
       content: content
     });
     page.save(err => {
+      console.log(err);
       if (err) {
-        fs.unlink(files.bg, clgErr);
-        files.content.forEach(el => fs.unlink(el, clgErr));
+        rmf(files.bg);
+        files.content.forEach(el => rmf(el));
         res.status(400).send({ status: 400, message: 'Somthing goes wrong .' });
       } else {
         res.status(200).send({
@@ -68,11 +70,12 @@ module.exports = (req, res) => {
       }
     });
   } catch (err) {
+    console.log(err);
     if (files) {
       if (files.bg) {
-        fs.unlink(files.bg, clgErr);
+        rmf(files.bg);
       }
-      if (files.content) files.content.forEach(el => fs.unlink(el, clgErr));
+      if (files.content) files.content.forEach(el => rmf(el, clgErr));
     }
   }
 };
@@ -98,13 +101,11 @@ module.exports.editPage = async (req, res) => {
     const page = await Page.findById(pageId);
     if (req.body.title) updateData.title = req.body.title;
     if (req.body.desc) updateData.desc = req.body.desc;
-    if (req.body.bg && page.style.bg.type === 'color')
-      updateData.style = {
-        template: page.style.template,
-        bg: { val: req.body.bg, type: req.body.bgType }
-      };
-    else if (page.style.bg.type === 'image/video' && req.file) {
-      rmf(page.style.bg);
+    if (
+      (page.style.bg.type === 'image' || page.style.bg.type === 'video') &&
+      req.file
+    ) {
+      rmf(page.style.bg.val);
       updateData.style = {
         template: page.style.template,
         bg: {

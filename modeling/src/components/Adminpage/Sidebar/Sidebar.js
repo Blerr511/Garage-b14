@@ -8,7 +8,6 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import './Sidebar.less';
 
-import logo from '../../../assets/img/logo_header.png';
 const Sidebar = _ => {
   const { routes, path } = _.routes;
   const handleLogout = _ => {
@@ -64,7 +63,11 @@ const Sidebar = _ => {
       <section className="logo">
         <a href={window.location.origin} target="_blank" className={'logoLink'}>
           {' '}
-          <img src={logo} alt="Logo" height="100" />
+          <img
+            src={require('../../../assets/img/logo_header.png')}
+            alt="Logo"
+            height="100"
+          />
           <span>Garage b14</span>
         </a>
       </section>

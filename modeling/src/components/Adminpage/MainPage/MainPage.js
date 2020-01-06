@@ -12,7 +12,14 @@ import Message from '../Message/Message';
 import Demo from '../Demo/Demo';
 import ReactHtmlParser from 'react-html-parser';
 import Button from '@material-ui/core/Button';
-
+import {
+  Card,
+  CardActions,
+  CardActionArea,
+  CardHeader,
+  CardContent,
+  TextField
+} from '@material-ui/core';
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -47,9 +54,16 @@ export default function MainPage() {
   const classes = useStyles();
   const [value, setValue] = React.useState(0);
   const [loading, setLoading] = useState(false);
+  const [editable, setEditable] = useState(false);
+  const [reset, setReset] = useState(false);
   const editorRef = useRef();
   const logoRef = useRef();
   const bgRef = useRef();
+  const newGoToRef = useRef();
+  const editEditorRef = useRef();
+  const editLogoRef = useRef();
+  const editBgRef = useRef();
+  const goToRef = useRef();
   const removePageHundler = async _id => {
     const formData = new FormData();
     formData.append('_id', _id);
@@ -65,6 +79,40 @@ export default function MainPage() {
       getItems();
       setLoading(false);
       setMessage({ type: 'success', text: 'Page removed', open: true });
+    } catch (err) {
+      if (err)
+        var text =
+          typeof err === 'string'
+            ? err
+            : typeof err.message === 'string'
+            ? err.message
+            : 'Somthing goes wrong .';
+      else var text = 'Somthing  goes wrong .';
+      setMessage({ type: 'error', text: text, open: true });
+      setLoading(false);
+    }
+  };
+
+  const editPageHundler = async (desc, inputLogoRef, inputBgRef, _id, goTo) => {
+    try {
+      const formData = new FormData();
+      formData.append('_id', _id);
+      formData.append('desc', desc);
+      if (inputLogoRef.current.files[0])
+        formData.append('logo', inputLogoRef.current.files[0]);
+      if (inputBgRef.current.files[0])
+        formData.append('bg', inputBgRef.current.files[0]);
+      if (goTo.current) formData.append('goTo', goTo.current.value);
+      let data = await fetch(`${process.env.SERVER}/api/mainItems/edit`, {
+        method: 'POST',
+        body: formData
+      });
+      data = await data.json();
+      setLoading(false);
+      getItems();
+      setEditable(false);
+      setReset(!reset);
+      setMessage({ type: 'success', text: 'Changes saved', open: true });
     } catch (err) {
       if (err)
         var text =
@@ -122,11 +170,11 @@ export default function MainPage() {
     getItems();
   }, []);
 
-  const saveNewItem = async (desc, bg, logo) => {
+  const saveNewItem = async (desc, bg, logo, goTo) => {
     const formData = new FormData();
     formData.append('desc', desc);
     formData.append('bg', bg);
-
+    formData.append('goTo', goTo);
     if (logo) formData.append('logo', logo);
     try {
       let data = await fetch(`${process.env.SERVER}/api/mainItems/add`, {
@@ -165,7 +213,8 @@ export default function MainPage() {
     }
     const bg = bgRef.current.files[0];
     const logo = logoRef.current.value === '' ? null : logoRef.current.files[0];
-    saveNewItem(desc, bg, logo);
+    const goTo = newGoToRef.current.value;
+    saveNewItem(desc, bg, logo, goTo);
   };
   return (
     <div className={classes.addPages}>
@@ -211,46 +260,201 @@ export default function MainPage() {
               value={value}
               index={id}
             >
-              <div
-                className={classes.fullWidthColumn}
-                style={
-                  el.bgType === 'image'
-                    ? { backgroundImage: `url(${el.bg})` }
-                    : null
-                }
-              >
-                {el.bgType === 'video' && (
-                  <video className={classes.bgVideoPlayer} autoPlay muted loop>
-                    <source src={el.bg} type="video/mp4" />
-                  </video>
-                )}
-                <div className={classes.flexCenter}>
-                  {el.logo && (
-                    <img
-                      style={{ marginRight: '25px' }}
-                      height="150"
-                      src={el.logo}
-                      alt="logo"
-                    />
-                  )}
-                  <div> {ReactHtmlParser(el.desc)}</div>
+              {editable === el._id ? (
+                <div className={classes.flexColumn}>
+                  <TextField
+                    inputRef={goToRef}
+                    defaultValue={el.goTo}
+                    label="Services name"
+                    style={{ marginBottom: '15px' }}
+                  ></TextField>
+                  <FormLabel component="legend">Description</FormLabel>
+                  <Editor
+                    ref={editEditorRef}
+                    initialValue={el.desc}
+                    apiKey={process.env.TINYAPIKEY}
+                    cloudChannel="5-stable"
+                    init={{
+                      // selector: 'textarea#full-featured',
+                      plugins:
+                        ' preview autolink  directionality visualblocks visualchars fullscreen  link  table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount textpattern noneditable charmap emoticons',
+                      toolbar:
+                        'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons  |   pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
+                      template_cdate_format:
+                        '[Date Created (CDATE): %m/%d/%Y : %H:%M:%S]',
+                      template_mdate_format:
+                        '[Date Modified (MDATE): %m/%d/%Y : %H:%M:%S]',
+                      height: 250,
+                      quickbars_selection_toolbar:
+                        'bold italic | quicklink h2 h3 blockquote quickimage quicktable',
+                      noneditable_noneditable_class: 'mceNonEditable',
+                      toolbar_drawer: 'sliding',
+                      spellchecker_dialog: true,
+                      spellchecker_whitelist: ['Ephox', 'Moxiecode'],
+                      tinycomments_mode: 'embedded',
+                      menubar: false,
+                      content_style: '.mymention{ color: gray; }',
+                      contextmenu: 'link',
+                      mentions_selector: '.mymention'
+                    }}
+                    inline={false}
+                  />
+                  <table style={{ marginTop: '30px', maxWidth: '700px' }}>
+                    <tbody>
+                      <tr>
+                        <td>
+                          {' '}
+                          <FormLabel component="legend">Logo</FormLabel>
+                        </td>
+                        <td>
+                          <input
+                            ref={editLogoRef}
+                            accept=".png, .jpeg,.jpg"
+                            type="file"
+                          />
+                        </td>
+                        <td>
+                          {el.logo && (
+                            <img
+                              style={{ marginRight: '25px' }}
+                              height="100"
+                              src={el.logo}
+                              alt="logo"
+                              style={{ background: 'gray' }}
+                            />
+                          )}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <FormLabel component="legend">
+                            Background image/video
+                          </FormLabel>
+                        </td>
+                        <td>
+                          {' '}
+                          <input
+                            ref={editBgRef}
+                            accept={'.png, .jpeg,.jpg, .mp4,.webm,.ogg'}
+                            type="file"
+                            style={{ minHeight: '46px' }}
+                          />
+                        </td>
+                        <td>
+                          {el.bgType === 'image' && (
+                            <img
+                              style={{ marginRight: '25px' }}
+                              height="100"
+                              src={el.bg}
+                              alt="logo"
+                              style={{ background: 'gray' }}
+                            />
+                          )}
+                          {el.bgType === 'video' && (
+                            <video
+                              autoPlay
+                              muted
+                              style={{
+                                height: '100px',
+                                objectFit: 'cover'
+                              }}
+                              loop
+                            >
+                              <source src={el.bg} type="video/mp4" />
+                            </video>
+                          )}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div>
+                    <Button
+                      color="primary"
+                      variant="contained"
+                      className={classes.horizontalMargin}
+                      onClick={_ =>
+                        editPageHundler(
+                          editEditorRef.current.editor.getContent(),
+                          editLogoRef,
+                          editBgRef,
+                          el._id,
+                          goToRef
+                        )
+                      }
+                    >
+                      Save
+                    </Button>
+                    <Button
+                      color="secondary"
+                      variant="contained"
+                      className={classes.horizontalMargin}
+                      onClick={_ => setEditable(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <Button
-                color="secondary"
-                variant="contained"
-                className={classes.horizontalMargin}
-                onClick={() => {
-                  removePageHundler(el._id);
-                }}
-              >
-                Remove
-              </Button>
+              ) : (
+                <div>
+                  <div className={classes.fullWidthColumn}>
+                    {el.bgType === 'image' && (
+                      <img
+                        src={el.bg}
+                        alt={el.bg}
+                        className={classes.miniVideoBg}
+                      />
+                    )}
+                    {el.bgType === 'video' && (
+                      <video
+                        className={classes.miniVideoBg}
+                        autoPlay
+                        muted
+                        loop
+                      >
+                        <source src={el.bg} type="video/mp4" />
+                      </video>
+                    )}
+                    <div className={classes.flexCenter}>
+                      {el.logo && (
+                        <img
+                          style={{ marginRight: '25px' }}
+                          height="150"
+                          src={el.logo}
+                          alt="logo"
+                        />
+                      )}
+                      <div> {ReactHtmlParser(el.desc)}</div>
+                    </div>
+                  </div>
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    onClick={_ => setEditable(el._id)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    color="secondary"
+                    variant="contained"
+                    className={classes.horizontalMargin}
+                    onClick={() => {
+                      removePageHundler(el._id);
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              )}
             </TabPanel>
           );
         })}
         <TabPanel value={value} index={items.length}>
           <div className={classes.flexColumn}>
+            <TextField
+              style={{ marginBottom: '15px' }}
+              inputRef={newGoToRef}
+              label="Service title"
+            />
             <FormLabel component="legend">Description</FormLabel>
             <Editor
               ref={editorRef}
@@ -259,9 +463,9 @@ export default function MainPage() {
               init={{
                 // selector: 'textarea#full-featured',
                 plugins:
-                  ' preview powerpaste casechange autolink  directionality advcode visualblocks visualchars fullscreen  link  table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists checklist wordcount tinymcespellchecker a11ychecker  textpattern noneditable  formatpainter permanentpen  charmap mentions  linkchecker emoticons',
+                  ' preview autolink  directionality visualblocks visualchars fullscreen  link  table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount textpattern noneditable charmap emoticons',
                 toolbar:
-                  'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons  |   pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
+                  'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | charmap emoticons  |   pageembed template link anchor codesample | a11ycheck ltr rtl | showcomments addcomment',
                 template_cdate_format:
                   '[Date Created (CDATE): %m/%d/%Y : %H:%M:%S]',
                 template_mdate_format:
@@ -335,7 +539,10 @@ export default function MainPage() {
           </div>
         </TabPanel>
       </div>
-      <Demo route={'main/' + (items[value] ? items[value]._id : '/')}></Demo>
+      <Demo
+        reset={reset}
+        route={'main/' + (items[value] ? items[value]._id : '/')}
+      ></Demo>
     </div>
   );
 }

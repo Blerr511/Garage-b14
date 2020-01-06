@@ -1,7 +1,6 @@
 .sidebar {
   width: 100%;
   min-height: 100vh;
-  background-image: url('../../../assets/img/sidebar.jpg');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: bottom;

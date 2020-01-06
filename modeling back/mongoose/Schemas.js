@@ -34,12 +34,18 @@ const page = new Schema({
     type: mongoose.SchemaTypes.Mixed
   },
   desc: { type: mongoose.SchemaTypes.Mixed, required: false },
-  content: { type: mongoose.SchemaTypes.Mixed, required: false, default: null }
+  content: [
+    { type: mongoose.Schema.Types.ObjectId, ref: 'Service', count: true }
+  ]
+});
+page.virtual('contentCount').get(async function() {
+  const res = await Page.findById(this._id);
+  return res.content.length;
 });
 const Page = new mongoose.model('Page', page);
 
 const serviceSchema = new Schema({
-  title: { type: String, required: true, default: 'title' },
+  title: { type: String, required: false, default: 'title' },
   desc: { type: String },
   img: { type: String }
 });
@@ -65,7 +71,8 @@ const mainItemSchema = new Schema({
   desc: String,
   bg: { type: String, required: true },
   logo: String,
-  bgType: String
+  bgType: String,
+  goTo: String
 });
 const MainItem = new mongoose.model('MainItem', mainItemSchema);
 

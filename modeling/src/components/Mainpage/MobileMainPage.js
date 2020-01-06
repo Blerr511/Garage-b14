@@ -9,6 +9,10 @@ const MobileMainPage = _ => {
   const [params] = React.useState(_.params);
   const classes = styles();
   const routes = params.map(el => /main/ + el._id);
+  const pushHistory = _.history.push;
+  const goToServices = _ => {
+    pushHistory('/services#' + _);
+  };
   return (
     <Route
       path={routes.concat('/main', '/')}
@@ -21,6 +25,7 @@ const MobileMainPage = _ => {
                 className="mainPageSection"
                 key={el._id}
                 id={el._id}
+                onClick={_ => goToServices(el.goTo)}
               >
                 {el.bgType === 'video' && (
                   <video

@@ -146,7 +146,7 @@ const Nav = props => {
                   <NavLink
                     exact
                     to={el.route}
-                    id={el.name === 'services' ? 'services' : null}
+                    // id={el.name === 'services' ? 'services' : null}
                   >
                     {el.name}
                   </NavLink>

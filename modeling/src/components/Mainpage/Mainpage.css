@@ -12,6 +12,7 @@
   justify-content: center;
   align-items: center;
   position: relative;
+  cursor: pointer;
 }
 .mainPage .mainPageSection .changeableFlex {
   display: flex;
@@ -57,8 +58,8 @@
 }
 .verticalBar > div a {
   margin: 5px 0;
-  width: 25px;
-  height: 25px;
+  width: 17px;
+  height: 17px;
   display: block;
   background: url(../../assets/img//dot.png);
   background-size: cover;
