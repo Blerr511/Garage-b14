@@ -23,7 +23,9 @@ const Popup = el => {
       <Dialog
         PaperProps={{
           style: {
-            maxWidth: '80%'
+            maxWidth: '80%',
+            backgroundColor: '#000000aa',
+            color: '#fff'
           }
         }}
         open={open}
