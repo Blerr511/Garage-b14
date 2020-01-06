@@ -3,7 +3,6 @@ import Gallery from 'react-grid-gallery';
 import { styles } from '../../styles/main';
 import ReactHtmlParser from 'react-html-parser';
 import ArrowPaginate from '../ArrowPaginate/ArrowPaginate';
-import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
 import './Portfolio.less';
 

@@ -81,7 +81,8 @@
 }
 .address {
   position: relative;
-  display: block;
+  display: flex;
+  justify-content: flex-end;
 }
 .address::before {
   content: '';

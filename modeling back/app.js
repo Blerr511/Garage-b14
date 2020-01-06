@@ -80,6 +80,7 @@ app.use(cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
+
 app.use('/uploads', express.static(__dirname + '/uploads'));
 app.post(
   '/login',

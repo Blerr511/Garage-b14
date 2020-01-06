@@ -41,6 +41,14 @@ module.exports = async (req, res) => {
       });
       await service.save(clgErr);
       content.push(service._id);
+    } else {
+      const service = new Service({
+        title: contentTitle ? contentTitle : '',
+        desc: contentDesc ? contentDesc : '',
+        img: files.content[0]
+      });
+      await service.save(clgErr);
+      content.push(service._id);
     }
     const route = title.replace(' ', '_');
     const page = new Page({
