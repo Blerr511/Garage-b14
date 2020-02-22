@@ -12,6 +12,10 @@
   width: 100%;
   z-index: 0;
 }
+body {
+  padding: 0;
+  margin: 0;
+}
 .night {
   position: relative;
   width: 100%;

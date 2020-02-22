@@ -22,34 +22,7 @@ module.exports = async (req, res) => {
           );
         }
       }
-    const content = [];
-    if (contentTitle && contentTitle instanceof Array)
-      for (let i = 0; i < contentTitle.length; i++) {
-        const service = new Service({
-          title: contentTitle[i] ? contentTitle[i] : '',
-          desc: contentDesc[i] ? contentDesc[i] : '',
-          img: files.content[i]
-        });
-        await service.save(clgErr);
-        content.push(service._id);
-      }
-    else if (contentTitle && !(contentTitle instanceof Array)) {
-      const service = new Service({
-        title: contentTitle ? contentTitle : '',
-        desc: contentDesc ? contentDesc : '',
-        img: files.content[0]
-      });
-      await service.save(clgErr);
-      content.push(service._id);
-    } else {
-      const service = new Service({
-        title: contentTitle ? contentTitle : '',
-        desc: contentDesc ? contentDesc : '',
-        img: files.content[0]
-      });
-      await service.save(clgErr);
-      content.push(service._id);
-    }
+
     const route = title.replace(' ', '_');
     const page = new Page({
       title: title,
@@ -61,14 +34,14 @@ module.exports = async (req, res) => {
           type: bgtype
         }
       },
-      content: content
+      content: []
     });
     page.save(err => {
-      console.log(err);
       if (err) {
         rmf(files.bg);
         files.content.forEach(el => rmf(el));
         res.status(400).send({ status: 400, message: 'Somthing goes wrong .' });
+        throw(err)
       } else {
         res.status(200).send({
           status: 200,
@@ -78,7 +51,7 @@ module.exports = async (req, res) => {
       }
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     if (files) {
       if (files.bg) {
         rmf(files.bg);

@@ -24,7 +24,7 @@ const Popup = el => {
         PaperProps={{
           style: {
             maxWidth: '80%',
-            backgroundColor: '#000000aa',
+            backgroundColor: '#000000',
             color: '#fff'
           }
         }}

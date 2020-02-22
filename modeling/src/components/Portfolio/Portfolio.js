@@ -3,7 +3,7 @@ import Gallery from 'react-grid-gallery';
 import { styles } from '../../styles/main';
 import ReactHtmlParser from 'react-html-parser';
 import ArrowPaginate from '../ArrowPaginate/ArrowPaginate';
-
+import GridGalarey from './GridGalarey';
 import './Portfolio.less';
 
 const Portfolio = _ => {
@@ -36,22 +36,7 @@ const Portfolio = _ => {
       setLoading(false);
     }
   };
-  const images = content
-    ? content.map(el => {
-        const img = new Image();
-        img.src = el.img;
-        return {
-          src: el.img,
-          caption: el.title,
-          thumbnail: el.img,
-          thumbnailHeight: img.height / 10,
-          thumbnailWidth: img.width / 10,
-          tags: el.desc
-            ? el.desc.split(' ').map(el => ({ value: el, title: el }))
-            : []
-        };
-      })
-    : [];
+
   return (
     <div
       className="portfolio"
@@ -88,16 +73,7 @@ const Portfolio = _ => {
         />
       )}
       {desc && ReactHtmlParser(desc)}
-      <div style={{ display: 'flex', flexDirection: 'column', zIndex: 2 }}>
-        <div className={loading ? 'fading' : 'showing'}>
-          <Gallery
-            id={`reactGridGalarey`}
-            enableImageSelection={false}
-            backdropClosesModal={true}
-            images={images}
-          />
-        </div>
-      </div>
+      <GridGalarey items={content} />
     </div>
   );
 };

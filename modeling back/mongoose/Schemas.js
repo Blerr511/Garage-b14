@@ -1,14 +1,6 @@
 const mongoose = require('./connect');
 const Schema = mongoose.Schema;
-
-const NotificationSchema = new Schema({
-  title: String,
-  description: String,
-  date: { type: mongoose.SchemaTypes.Date, default: new Date() },
-  active: { type: Boolean, default: true }
-});
-const Notification = new mongoose.model('Notification', NotificationSchema);
-
+const {debugLog,debugLogError} = require("../logger.js");
 const UserSchema = new Schema({
   username: {
     type: String,
@@ -36,7 +28,20 @@ const page = new Schema({
   desc: { type: mongoose.SchemaTypes.Mixed, required: false },
   content: [
     { type: mongoose.Schema.Types.ObjectId, ref: 'Service', count: true }
-  ]
+  ],
+  position: { type: Number, unique: true }
+});
+page.pre('validate', async function() {
+  const items = await Page.find({});
+  if(!items || items.length === 0)
+   {
+     this.position = 0;
+   }
+   else{
+    const sorted = items.sort((a,b)=>a.position-b.position);
+    const lastPosition = sorted[sorted.length - 1].position + 1;
+    this.position = lastPosition;
+   }
 });
 page.virtual('contentCount').get(async function() {
   const res = await Page.findById(this._id);
@@ -47,34 +52,38 @@ const Page = new mongoose.model('Page', page);
 const serviceSchema = new Schema({
   title: { type: String, required: false, default: 'title' },
   desc: { type: String },
-  img: { type: String }
+  img: { type: String },
+  other: { type: mongoose.SchemaTypes.Mixed }
 });
 
 const Service = new mongoose.model('Service', serviceSchema);
-
-const portfolioSchema = new Schema({
-  title: String,
-  tags: [String],
-  img: String
-});
-const Portfolio = new mongoose.model('Portfolio', portfolioSchema);
-
-const teamSchema = new Schema({
-  title: { type: String, required: true, default: 'title' },
-  desc: { type: String },
-  img: { type: String }
-});
-
-const Team = new mongoose.model('Team', teamSchema);
 
 const mainItemSchema = new Schema({
   desc: String,
   bg: { type: String, required: true },
   logo: String,
   bgType: String,
-  goTo: String
+  route:String,
+  goTo: String,
+  position: { type: Number , unique:true }
 });
+mainItemSchema.pre('validate', async function() {
+  const items = await MainItem.find({});
+  if(!items || items.length === 0)
+   {
+     this.position = 0;
+   }
+   else{
+    const sorted = items.sort((a,b)=>a.position-b.position);
+    const lastPosition = sorted[sorted.length - 1].position + 1;
+    this.position = lastPosition;
+   }
+
+});
+
 const MainItem = new mongoose.model('MainItem', mainItemSchema);
+
+
 
 const soclinkSchema = new Schema({
   name: { type: String, required: true },
@@ -114,12 +123,9 @@ const mailSchema = new Schema({
 
 const Mail = new mongoose.model('Mail', mailSchema);
 
-module.exports.Team = Team;
-module.exports.Portfolio = Portfolio;
 module.exports.Service = Service;
 module.exports.Page = Page;
 module.exports.User = User;
-module.exports.Notification = Notification;
 module.exports.MainItem = MainItem;
 module.exports.Soclink = Soclink;
 module.exports.ContactInfo = ContactInfo;

@@ -5,7 +5,7 @@ module.exports.rmf = async urlPath => {
     if (typeof urlPath === 'string') {
       const path = urlPath.replace(
         /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\?]+)?(?::{1}\d{0,4}){0,1}/,
-        global.appDir
+        global._appDirname
       );
 
       fs.unlinkSync(path);
@@ -16,7 +16,7 @@ module.exports.rmf = async urlPath => {
         fs.unlinkSync(
           el.replace(
             /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:\/\?]+)?(?::{1}\d{0,4}){0,1}/,
-            global.appDir
+            global._appDirname
           )
         );
         deletedCount++;

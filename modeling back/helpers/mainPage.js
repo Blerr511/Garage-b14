@@ -2,7 +2,7 @@ const MainItem = require('../mongoose/Schemas').MainItem;
 const rmf = require('./mFs').rmf;
 const mongoose = require('mongoose');
 module.exports.get = async (req, res) => {
-  const mainItem = await MainItem.find({});
+  const mainItem = await MainItem.find({}).sort('position');
   res
     .status(200)
     .send({ code: 200, message: 'Ok', data: mainItem ? mainItem : [] });
@@ -12,11 +12,10 @@ module.exports.add = async (req, res) => {
   const desc = req.body.desc;
   const goTo = req.body.goTo.replace(/ /g, '_');
   try {
-    const objId = new mongoose.Types.ObjectId();
+    // const objId = new mongoose.Types.ObjectId();
     const mainItem = new MainItem({
       desc: desc,
-      _id: objId,
-      route: objId,
+      route: this._id,
       goTo: goTo
     });
     let bgExists = false;
@@ -111,4 +110,22 @@ module.exports.remove = async (req, res) => {
         ? { code: 400, message: 'Something goes wrong' }
         : { code: 200, message: 'Changes saved' }
     );
+};
+
+module.exports.changeMainItemPosition = async (req, res) => {
+  try {
+    const { _id, position } = req.body;
+    const mainItem = await MainItem.findOne({ _id: _id });
+    if (!mainItem) throw 'page not found';
+    await MainItem.updateOne({ _id: _id }, { $set: { position: 999 } });
+    await MainItem.updateOne(
+      { position: position },
+      { $set: { position: mainItem.position } }
+    );
+    await MainItem.updateOne({ _id: _id }, { $set: { position: position } });
+    res.status(200).send({ message: 'success' });
+  } catch (error) {
+    console.error(error);
+    res.status(400).send({ message: 'error' });
+  }
 };

@@ -3,5 +3,7 @@
     "hostname": "http://localhost:2000"
   },
 
-  "JWTsecret": "BlerrIsHeree"
+  "JWTsecret": "BlerrIsHeree",
+  "logPath": "/log",
+  "logFilename": "node.log"
 }

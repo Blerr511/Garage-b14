@@ -18,8 +18,11 @@ import {
   CardActionArea,
   CardHeader,
   CardContent,
-  TextField
+  TextField,
+  IconButton
 } from '@material-ui/core';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowUp, faArrowDown } from '@fortawesome/free-solid-svg-icons';
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -216,6 +219,32 @@ export default function MainPage() {
     const goTo = newGoToRef.current.value;
     saveNewItem(desc, bg, logo, goTo);
   };
+
+  const changePositionHandler = async (_id, position) => {
+    const formData = new FormData();
+    formData.append('_id', _id);
+    formData.append('position', position);
+    try {
+      await fetch(`${process.env.SERVER}/api/mainItems/position`, {
+        method: 'POST',
+        body: formData
+      });
+
+      await getItems();
+      handleChange(null, position);
+    } catch (err) {
+      if (err)
+        var text =
+          typeof err === 'string'
+            ? err
+            : typeof err.message === 'string'
+            ? err.message
+            : 'Somthing goes wrong .';
+      else var text = 'Somthing  goes wrong .';
+      getItems();
+      setMessage({ type: 'error', text: text, open: true });
+    }
+  };
   return (
     <div className={classes.addPages}>
       <div className={classes.verticalTabs}>
@@ -248,7 +277,38 @@ export default function MainPage() {
           className={classes.tabs}
         >
           {items.map((el, id) => (
-            <Tab key={el._id} label={`Page ${id + 1}`} {...a11yProps(id)} />
+            <Tab
+              key={el._id}
+              label={
+                <div style={{ display: 'flex' }}>
+                  <IconButton
+                    style={{ margin: '0 5px' }}
+                    disabled={id === 0}
+                    color="primary"
+                    size="small"
+                    onClick={_ => {
+                      if (id !== 0) changePositionHandler(el._id, id - 1);
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faArrowUp} />
+                  </IconButton>
+                  {el.goTo ? el.goTo.slice(0, 5) + '...' : '...'}
+                  <IconButton
+                    style={{ margin: '0 5px' }}
+                    disabled={id === items.length - 1}
+                    color="secondary"
+                    size="small"
+                    onClick={_ => {
+                      if (id !== items.length - 1)
+                        changePositionHandler(el._id, id + 1);
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faArrowDown} />
+                  </IconButton>
+                </div>
+              }
+              {...a11yProps(id)}
+            />
           ))}
           <Tab label="Add new page" {...a11yProps(items.length)} />
         </Tabs>

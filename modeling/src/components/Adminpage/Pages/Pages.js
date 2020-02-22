@@ -38,7 +38,9 @@ import {
   faPen,
   faTimes,
   faMinus,
-  faEye
+  faEye,
+  faArrowUp,
+  faArrowDown
 } from '@fortawesome/free-solid-svg-icons';
 
 import { createUrl, placeholderTestUrl } from '../../../methods/createUrl';
@@ -46,6 +48,7 @@ import { createUrl, placeholderTestUrl } from '../../../methods/createUrl';
 import './Pages.less';
 import { useRef } from 'react';
 import PortfolioContent from './PortfolioContent';
+import { IconButton } from '@material-ui/core';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -89,7 +92,8 @@ function VerticalTabs(props) {
   const contentEditTitle = useRef();
   const contentEditDesc = useRef();
   const contentEditLogo = useRef();
-
+  const portoflioThumbRef = useRef();
+  const portfolioModelRef = useRef();
   const [saveLoading, setSaveLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [colorChange, setColorChange] = useState(false);
@@ -134,6 +138,29 @@ function VerticalTabs(props) {
       return el;
     });
   };
+
+  const addPortfolioHundler = pageId => {
+    const title = contentTitleRef.current.value,
+      desc = contentDescRef.current.value;
+    const files = {
+      thumbnail: portoflioThumbRef.current.files[0],
+      model: portfolioModelRef.current.files
+    };
+    console.log(files);
+    const closeDialog = () => setPortfolioDialog(false);
+    props.addContentHundler(pageId, title, desc, files, closeDialog);
+    if (contentTitleRef.current) contentTitleRef.current.value = '';
+    if (contentDescRef.current) contentDescRef.current.value = '';
+    if (contentFileRef.current) contentFileRef.current.value = '';
+    props.setRoute('/');
+    for (let i = 0; i < tempPages.length; i++) {
+      if (tempPages[i]._id === pageId) {
+        props.setRoute(tempPages[i].title.replace(/\ /g, '_'));
+      }
+    }
+    setExpanded(false);
+  };
+
   const addContentHundler = pageId => {
     const title = contentTitleRef.current.value,
       desc = contentDescRef.current.value;
@@ -207,6 +234,7 @@ function VerticalTabs(props) {
       b: b
     };
   }
+
   return (
     <div className={classes.verticalTabs}>
       <Tabs
@@ -222,7 +250,37 @@ function VerticalTabs(props) {
             <Tab
               key={el._id}
               index={id}
-              label={el.title ? el.title : '[no title]'}
+              label={
+                <div style={{ display: 'flex' }}>
+                  <IconButton
+                    color="primary"
+                    style={{ margin: '0 5px' }}
+                    size={'small'}
+                    disabled={id === 0}
+                    onClick={_ => {
+                      if (id !== 0) {
+                        props.changePositionHandler(el._id, id - 1);
+                      }
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faArrowUp} />
+                  </IconButton>
+                  {el.title ? el.title : '[no title]'}
+                  <IconButton
+                    color="secondary"
+                    style={{ margin: '0 5px' }}
+                    size={'small'}
+                    disabled={id === pages.length - 1}
+                    onClick={_ => {
+                      if (id !== pages.length - 1) {
+                        props.changePositionHandler(el._id, id + 1);
+                      }
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faArrowDown} />
+                  </IconButton>
+                </div>
+              }
               {...a11yProps(el._id)}
             />
           );
@@ -239,7 +297,6 @@ function VerticalTabs(props) {
           >
             <div className={classes.pageHead}>
               <TextField
-                id="standard-read-only-input"
                 label="Title"
                 defaultValue={el.title ? el.title : ''}
                 className={classes.textField}
@@ -253,7 +310,6 @@ function VerticalTabs(props) {
               />
               <span>
                 <TextField
-                  id="standard-read-only-input"
                   label="Template"
                   defaultValue={
                     el.style.template === 'template1'
@@ -391,7 +447,7 @@ function VerticalTabs(props) {
                     <PortfolioContent
                       removeContentHundler={props.removeContentHundler}
                       pageId={el._id}
-                      open={showPortfolioItems}
+                      open={showPortfolioItems == el._id}
                       onClose={() => setShowPortfolioItems(false)}
                     />
                   }
@@ -421,11 +477,36 @@ function VerticalTabs(props) {
                           type="text"
                           inputRef={contentDescRef}
                         />
-                        <input
-                          accept="image/png, image/jpeg"
-                          type="file"
-                          ref={contentFileRef}
-                        />
+                        <table>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <Typography>Thumbnail:</Typography>
+                              </td>
+                              <td>
+                                <input
+                                  accept=".jpg , .jpeg, .png"
+                                  type="file"
+                                  ref={portoflioThumbRef}
+                                />
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <Typography>Model:</Typography>
+                              </td>
+                              <td>
+                                {' '}
+                                <input
+                                  accept=".jpg , .jpeg , .png , .zip"
+                                  type="file"
+                                  multiple
+                                  ref={portfolioModelRef}
+                                />
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
                       </DialogContent>
                       <DialogActions>
                         <Button
@@ -435,7 +516,7 @@ function VerticalTabs(props) {
                           Cancel
                         </Button>
                         <Button
-                          onClick={_ => addContentHundler(p._id)}
+                          onClick={_ => addPortfolioHundler(p._id)}
                           color="primary"
                         >
                           Add
@@ -445,7 +526,7 @@ function VerticalTabs(props) {
                   ) : null}
                   <div style={{ display: 'flex' }}>
                     <Card
-                      onClick={() => setShowPortfolioItems(true)}
+                      onClick={() => setShowPortfolioItems(el._id)}
                       className={classes.card}
                     >
                       <CardContent>
@@ -484,7 +565,6 @@ function VerticalTabs(props) {
                       <ExpansionPanelDetails className={classes.flexColumn}>
                         <div>
                           <TextField
-                            id="standard-read-only-input"
                             label="Title"
                             defaultValue={el.title}
                             className={classes.textField}
@@ -496,7 +576,6 @@ function VerticalTabs(props) {
                             }}
                           />
                           {/* <TextField
-                            id="standard-read-only-input"
                             label="Description"
                             defaultValue={el.desc}
                             className={classes.textField}
@@ -743,14 +822,27 @@ const Pages = () => {
       .catch(_ => setLoading(false));
   }, []);
   const addContentHundler = (pageId, title, desc, file, closeDialog) => {
+    console.log(file);
     const formData = new FormData();
     formData.append('title', title);
     formData.append('desc', desc);
-    formData.append('file', file);
+    if (file instanceof Object) {
+      for (const k in file) {
+        if (file[k] instanceof FileList)
+          for (let i = 0; i < file[k].length; i++) {
+            const f = file[k][i];
+            console.log(f);
+            formData.append(k, f);
+          }
+        else if (file[k] instanceof File) {
+          formData.append(k, file[k]);
+        }
+      }
+    }
     formData.append('pageId', pageId);
     setLoading(true);
     closeDialog();
-
+    console.log(formData);
     fetch(`${process.env.SERVER}/api/addContent`, {
       method: 'POST',
       body: formData
@@ -912,7 +1004,30 @@ const Pages = () => {
       setMessage({ type: 'error', text: text, open: true });
     }
   };
+  const changePositionHandler = async (_id, position) => {
+    try {
+      const formData = new FormData();
+      formData.append('_id', _id);
+      formData.append('position', position);
 
+      let data = await fetch(`${process.env.SERVER}/api/changePosition`, {
+        method: 'POST',
+        body: formData
+      });
+      getPages();
+    } catch (err) {
+      getPages();
+      if (err)
+        var text =
+          typeof err === 'string'
+            ? err
+            : typeof err.message === 'string'
+            ? err.message
+            : 'Somthing goes wrong .';
+      else var text = 'Somthing  goes wrong .';
+      setMessage({ type: 'error', text: text, open: true });
+    }
+  };
   const [route, setRoute] = React.useState('');
   return (
     <div>
@@ -942,6 +1057,7 @@ const Pages = () => {
           addContentHundler={addContentHundler}
           removeContentHundler={removeContentHundler}
           contentEditHandler={contentEditHandler}
+          changePositionHandler={changePositionHandler}
           removePage={removePage}
           editPageHundler={editPageHundler}
           pages={pages.data}

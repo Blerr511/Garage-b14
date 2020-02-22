@@ -5,12 +5,13 @@ const ErrorOverlayPlugin = require('error-overlay-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 var dotenv = require('dotenv').config({ path: __dirname + '/.env' });
 
-module.exports = env => {
+module.exports = (env, argv) => {
+  const isProduction = argv.mode === 'production';
   return {
     entry: ['@babel/polyfill', './src/index.js'],
     output: {
       path: path.join(__dirname, '/dist'),
-      filename: 'index_bundle.js',
+      filename: '[name][hash].js',
       publicPath: '/'
     },
     module: {
@@ -29,26 +30,31 @@ module.exports = env => {
           use: ['style-loader', 'css-loader', 'less-loader']
         },
         {
-          test: /\.(woff(2)?|ttf|eot|svg|png|jpg|jpeg)(\?v=\d+\.\d+\.\d+)?$/,
+          test: /\.(woff(2)?|ttf|eot|svg|png|jpg|jpeg|gif)(\?v=\d+\.\d+\.\d+)?$/,
           use: 'url-loader?limit=10000&name=assets/[hash].[ext]'
         }
       ]
     },
     devServer: {
       historyApiFallback: true,
-      port: process.env.PORT || 3000,
-      host: process.env.HOST || 'localhost'
+      port: isProduction ? process.env.PORT : process.env._PORT,
+      host: isProduction ? process.env.HOST : process.env._HOST
     },
     plugins: [
       new HtmlWebpackPlugin({
         template: './public/index.html'
       }),
       new webpack.DefinePlugin({
-        'process.env.PORT': JSON.stringify(dotenv.parsed.PORT),
-        'process.env.HOST': JSON.stringify(dotenv.parsed.HOST),
+        'process.env.PORT': JSON.stringify(
+          isProduction ? dotenv.parsed.PORT : dotenv.parsed._PORT
+        ),
+        'process.env.HOST': JSON.stringify(
+          isProduction ? dotenv.parsed.HOST : dotenv.parsed._HOST
+        ),
         'process.env.TINYAPIKEY': JSON.stringify(dotenv.parsed.TINYAPIKEY),
-        'process.env.SERVER':
-          JSON.stringify(dotenv.parsed.SERVER) || 'http://localhost:8080'
+        'process.env.SERVER': isProduction
+          ? JSON.stringify(dotenv.parsed.SERVER)
+          : 'http://localhost:8080'
       }),
       new ErrorOverlayPlugin(),
       new CopyWebpackPlugin([{ from: 'src/assets', to: 'assets' }])

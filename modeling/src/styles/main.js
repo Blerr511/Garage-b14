@@ -8,6 +8,28 @@ export const styles = makeStyles(theme => ({
     height: '100%',
     width: '100%'
   },
+  gridGalarey: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    overflow: 'hidden',
+    backgroundColor: theme.palette.background.paper
+  },
+  tags: {
+    zIndex: 10,
+    position: 'absolute',
+    bottom: '8px',
+    left: '2px',
+    display: 'flex',
+    flexWrap: 'wrap',
+    fontSize: '12px',
+    '& >span': {
+      padding: '2px 4px',
+      margin: '2px',
+      background: '#00000040',
+      color: 'yellow'
+    }
+  },
   miniVideoBg: {
     width: '100%',
     height: '100%',

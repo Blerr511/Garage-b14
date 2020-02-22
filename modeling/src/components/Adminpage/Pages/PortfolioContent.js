@@ -33,7 +33,11 @@ const PortfolioContent = _ => {
   const [error, setError] = useState('');
   const editTitleRef = useRef();
   const editFileRef = useRef();
+  const editFilesRef = useRef();
   const editDescRef = useRef();
+  const editFilesMatRef = useRef();
+  const editFilesTextRef = useRef();
+
   useEffect(() => {
     fetchContent(pageId, page, limit);
   }, []);
@@ -67,14 +71,25 @@ const PortfolioContent = _ => {
   const c = useMemo(() => (_.open ? fetchContent(pageId, page, limit) : null), [
     _.open
   ]);
-  const contentEditHandler = async (_id, title, desc, logo) => {
-    console.log(editTitleRef.current, editFileRef.current);
+  const contentEditHandler = async (_id, title, desc, logo, otherFiles) => {
+    console.log(otherFiles);
     try {
       const formData = new FormData();
       formData.append('contentId', _id);
       if (desc) formData.append('desc', desc);
       if (title) formData.append('title', title);
       if (logo) formData.append('logo', logo);
+      if (otherFiles) {
+        for (const k in otherFiles) {
+          if (otherFiles.hasOwnProperty(k)) {
+            const files = otherFiles[k];
+            for (let i = 0; i < files.length; i++) {
+              const file = files[i];
+              formData.append(k, file);
+            }
+          }
+        }
+      }
 
       let data = await fetch(`${process.env.SERVER}/api/editContent`, {
         method: 'POST',
@@ -126,122 +141,209 @@ const PortfolioContent = _ => {
           data.content &&
           data.content.map(el => {
             return (
-              <Card key={el._id} className={classes.cardStandard}>
-                <CardHeader
-                  title={
-                    editable === el._id ? (
-                      <TextField
-                        inputRef={editTitleRef}
-                        defaultValue={el.title}
-                        label="Title"
-                      ></TextField>
-                    ) : (
-                      <Typography>{el.title || '_'}</Typography>
-                    )
-                  }
-                  style={{ padding: '9px 16px 0' }}
-                  action={
-                    editable === el._id ? (
-                      <IconButton
-                        onClick={_ => {
+              <React.Fragment key={el._id}>
+                {editable === el._id && (
+                  <Dialog
+                    open={editable === el._id}
+                    onClose={() => setEditable(false)}
+                  >
+                    <div
+                      style={{
+                        padding: '16px',
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}
+                    >
+                      <table>
+                        <tbody>
+                          <tr>
+                            <td colSpan="2">
+                              <TextField
+                                label="Tags"
+                                inputRef={editDescRef}
+                                defaultValue={el.desc}
+                              ></TextField>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <Typography>Thumbnail:</Typography>
+                            </td>
+                            <td>
+                              <input
+                                accept=".png , .jpg , .jpeg "
+                                type="file"
+                                ref={editFileRef}
+                                style={{ marginTop: '15px' }}
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <Typography>Model:</Typography>
+                            </td>
+                            <td>
+                              {' '}
+                              <input
+                                accept=".png , .jpg , .jpeg , .obj , .mtl , .gltf , .fbx,.json"
+                                multiple
+                                type="file"
+                                ref={editFilesRef}
+                                style={{ marginTop: '15px' }}
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <Typography>Textures:</Typography>
+                            </td>
+                            <td>
+                              {' '}
+                              <input
+                                accept="image/*"
+                                multiple
+                                type="file"
+                                ref={editFilesTextRef}
+                              />
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <Typography>Materials:</Typography>
+                            </td>
+                            <td>
+                              <input
+                                type="file"
+                                accept=".mtl"
+                                multiple
+                                ref={editFilesMatRef}
+                              />
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <DialogActions>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={_ =>
                           contentEditHandler(
                             el._id,
                             editTitleRef.current.value,
                             editDescRef.current.value,
-                            editFileRef.current.files[0]
-                          );
-                        }}
-                        color="primary"
+                            editFileRef.current.files[0],
+                            {
+                              model: editFilesRef.current.files,
+                              texture: editFilesTextRef.current.files,
+                              material: editFilesMatRef.current.files
+                            }
+                          )
+                        }
                       >
-                        <FontAwesomeIcon
-                          icon={faCheck}
-                          style={{ width: '20px', height: '20px' }}
-                        />
-                      </IconButton>
-                    ) : (
-                      <IconButton
-                        onClick={_ => {
-                          setAnchorEl(
-                            anchorEl && anchorEl._id
-                              ? null
-                              : { el: _.currentTarget, _id: el._id }
-                          );
-                        }}
-                      >
-                        <FontAwesomeIcon
-                          icon={faBars}
-                          style={{ width: '20px', height: '20px' }}
-                        />
-                        <Popover
-                          open={anchorEl !== null}
-                          anchorEl={anchorEl ? anchorEl.el : null}
-                          anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left'
+                        Save
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
+                )}
+                <Card className={classes.cardStandard}>
+                  <CardHeader
+                    title={
+                      editable === el._id ? (
+                        <TextField
+                          inputRef={editTitleRef}
+                          defaultValue={el.title}
+                          label="Title"
+                        ></TextField>
+                      ) : (
+                        <Typography>{el.title || '_'}</Typography>
+                      )
+                    }
+                    style={{ padding: '9px 16px 0' }}
+                    action={
+                      editable === el._id ? (
+                        <IconButton color="primary">
+                          <FontAwesomeIcon
+                            icon={faCheck}
+                            style={{ width: '20px', height: '20px' }}
+                          />
+                        </IconButton>
+                      ) : (
+                        <IconButton
+                          onClick={_ => {
+                            setAnchorEl(
+                              anchorEl && anchorEl._id
+                                ? null
+                                : { el: _.currentTarget, _id: el._id }
+                            );
                           }}
-                          transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'left'
-                          }}
-                          // onClose={handlePopoverClose}
-                          disableRestoreFocus
                         >
-                          <div
-                            style={{ display: 'flex', flexDirection: 'column' }}
+                          <FontAwesomeIcon
+                            icon={faBars}
+                            style={{ width: '20px', height: '20px' }}
+                          />
+                          <Popover
+                            open={anchorEl !== null && anchorEl._id === el._id}
+                            anchorEl={anchorEl ? anchorEl.el : null}
+                            anchorOrigin={{
+                              vertical: 'bottom',
+                              horizontal: 'left'
+                            }}
+                            transformOrigin={{
+                              vertical: 'top',
+                              horizontal: 'left'
+                            }}
+                            // onClose={handlePopoverClose}
+                            disableRestoreFocus
                           >
-                            <Button
-                              onClick={_ => {
-                                setEditable(anchorEl ? anchorEl._id : null);
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column'
                               }}
                             >
-                              Edit
-                            </Button>
-                            <Button
-                              onClick={_ => {
-                                setLoading(true);
-                                removeContentHundler(
-                                  pageId,
-                                  anchorEl._id
-                                ).then(_ => fetchContent(pageId, page, limit));
-                              }}
-                            >
-                              Delete
-                            </Button>
-                          </div>
-                        </Popover>
-                      </IconButton>
-                    )
-                  }
-                ></CardHeader>
+                              <Button
+                                onClick={_ => {
+                                  setEditable(anchorEl ? anchorEl._id : null);
+                                }}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                onClick={_ => {
+                                  setLoading(true);
+                                  removeContentHundler(
+                                    pageId,
+                                    anchorEl._id
+                                  ).then(_ =>
+                                    fetchContent(pageId, page, limit)
+                                  );
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </Popover>
+                        </IconButton>
+                      )
+                    }
+                  ></CardHeader>
 
-                <CardContent style={{ padding: '0' }}>
-                  {editable === el._id ? (
-                    <div style={{ padding: '16px' }}>
-                      {' '}
-                      <TextField
-                        label="Tags"
-                        inputRef={editDescRef}
-                        defaultValue={el.desc}
-                      ></TextField>
-                      <input
-                        type="file"
-                        ref={editFileRef}
-                        style={{ marginTop: '15px' }}
+                  <CardContent style={{ padding: '0' }}>
+                    {
+                      <img
+                        src={el.img}
+                        style={{
+                          width: '200px',
+                          height: '175px',
+                          objectFit: 'cover'
+                        }}
+                        alt={el.img}
                       />
-                    </div>
-                  ) : (
-                    <img
-                      src={el.img}
-                      style={{
-                        width: '200px',
-                        height: '175px',
-                        objectFit: 'cover'
-                      }}
-                      alt={el.img}
-                    />
-                  )}
-                </CardContent>
-              </Card>
+                    }
+                  </CardContent>
+                </Card>
+              </React.Fragment>
             );
           })}
       </DialogContent>

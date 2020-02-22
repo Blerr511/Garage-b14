@@ -145,11 +145,10 @@ export default function FullWidthTabs(props) {
     img: null
   };
   const [loading, setLoading] = React.useState(false);
-  const [portfolioDialog, setPortfolioDialog] = React.useState(false);
 
   const savePage = async _ => {
     if (!loading) {
-      const { title, bg, bgtype, template, content } = _;
+      const { title, bg, bgtype, template } = _;
       setLoading(true);
       const _bg =
         bgtype === 'color' ? bg.hex : bgtype === 'image/video' ? bg.file : null;
@@ -159,14 +158,9 @@ export default function FullWidthTabs(props) {
         desc: desc ? desc : '',
         bg: _bg,
         bgtype: bgtype,
-        template: template,
-        content: content
+        template: template
       };
-      Object.defineProperties(jsonData, {
-        content: {
-          enumerable: false
-        }
-      });
+
       const formData = new FormData();
       for (const k in jsonData) {
         if (jsonData.hasOwnProperty(k)) {
@@ -336,8 +330,6 @@ export default function FullWidthTabs(props) {
         id: portfolio.length
       })
     );
-
-    setPortfolioDialog(false);
   };
 
   return (
@@ -545,197 +537,7 @@ export default function FullWidthTabs(props) {
                   />{' '}
                 </RadioGroup>
               </FormControl>
-              {template === 'template2'
-                ? content.map(el => {
-                    return (
-                      <ExpansionPanel key={el.id}>
-                        <ExpansionPanelSummary
-                          aria-controls="panel1a-content"
-                          id="panel1a-header"
-                          expandIcon={<FontAwesomeIcon icon={faPlusSquare} />}
-                        >
-                          <Typography className={classes.heading}>
-                            {el.title}
-                          </Typography>
-                        </ExpansionPanelSummary>
-                        <ExpansionPanelDetails className={classes.flexColumn}>
-                          <div>
-                            <Typography>{el.title}</Typography>
-                            <Typography>{el.desc}</Typography>
-                            <img
-                              height={100}
-                              src={createUrl(el.img)}
-                              alt={el.title}
-                            />
-                          </div>
-                          <Button
-                            onClick={_ => removeContentItem(el.id)}
-                            variant="contained"
-                            color="secondary"
-                            startIcon={<FontAwesomeIcon icon={faTrash} />}
-                          >
-                            Delete
-                          </Button>
-                        </ExpansionPanelDetails>
-                      </ExpansionPanel>
-                    );
-                  })
-                : null}
-              {template === 'template2' ? (
-                <ExpansionPanel
-                  expanded={expanded}
-                  onChange={_ => setExpanded(!expanded)}
-                >
-                  <ExpansionPanelSummary
-                    aria-controls="panel1a-content"
-                    id="panel1a-header"
-                    expandIcon={<FontAwesomeIcon icon={faPlusSquare} />}
-                  >
-                    <Typography className={classes.heading}>
-                      Add new content
-                    </Typography>
-                  </ExpansionPanelSummary>
-                  <ExpansionPanelDetails className={classes.flexColumn}>
-                    <TextField
-                      inputRef={contentTitleRef}
-                      id="standard-name"
-                      label="Title"
-                      className={classes.textField}
-                      margin="normal"
-                      defaultValue=""
-                      // onChange={_ =>
-                      //   contentChangeHundler({ title: _.target.value })
-                      // }
-                    />
-                    <TextField
-                      inputRef={contentDescRef}
-                      // onChange={_ =>
-                      //   contentChangeHundler({ desc: _.target.value })
-                      // }
-                      defaultValue=""
-                      id="standard-multiline-static"
-                      label="Description"
-                      multiline
-                      rows="4"
-                      className={classes.textField}
-                      margin="normal"
-                    />
-                    {'Image:'}
-                    <input
-                      accept="image/png, image/jpeg"
-                      ref={contentFileRef}
-                      type="file"
-                      // onChange={_ => {
-                      //   contentChangeHundler({
-                      //     img: _.target.files[0]
-                      //   });
-                      // }}
-                    />
-                    <div style={{ marginTop: '15px' }}>
-                      <Button
-                        onClick={addContentHundler}
-                        style={{ marginRight: '15px' }}
-                        variant="contained"
-                        color="primary"
-                        startIcon={<FontAwesomeIcon icon={faSave} />}
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        onClick={_ => setExpanded(false)}
-                        variant="contained"
-                        color="secondary"
-                        startIcon={<FontAwesomeIcon icon={faTrash} />}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </ExpansionPanelDetails>
-                </ExpansionPanel>
-              ) : null}{' '}
-              <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-                {template === 'template3'
-                  ? portfolio.map(el => {
-                      const element = el;
-                      return (
-                        <div key={el.img}>
-                          <Card key={el.img} className={classes.card}>
-                            <CardMedia
-                              className={classes.media}
-                              image={createUrl(el.img)}
-                            />{' '}
-                            <IconButton
-                              className={classes.absTR}
-                              aria-label="settings"
-                              onClick={_ => removePortfolioItem(element.id)}
-                            >
-                              <FontAwesomeIcon
-                                icon={faTimesCircle}
-                                style={{
-                                  fontSize: '20px',
-                                  color: '#fff'
-                                }}
-                              />
-                            </IconButton>
-                          </Card>
-                        </div>
-                      );
-                    })
-                  : null}
-                {template === 'template3' ? (
-                  <Card
-                    onClick={() => setPortfolioDialog(true)}
-                    className={classes.card}
-                  >
-                    <CardContent>
-                      <FontAwesomeIcon
-                        icon={faPlusSquare}
-                        style={{ fontSize: '40px' }}
-                      />
-                    </CardContent>
-                  </Card>
-                ) : null}
-              </div>
-              {template === 'template3' && portfolioDialog ? (
-                <Dialog
-                  open={portfolioDialog}
-                  onClose={_ => setPortfolioDialog(false)}
-                  aria-labelledby="form-dialog-title"
-                >
-                  <DialogTitle id="form-dialog-title">Portfolio</DialogTitle>
-                  <DialogContent className={classes.flexColumn}>
-                    <DialogContentText>
-                      Add items to portfolio
-                    </DialogContentText>
-                    <TextField
-                      autoFocus
-                      margin="dense"
-                      label="Author"
-                      type="text"
-                      inputRef={portfolioTitleRef}
-                    />{' '}
-                    <TextField
-                      margin="dense"
-                      label="Tags"
-                      type="text"
-                      inputRef={portfolioDescRef}
-                    />
-                    <input
-                      accept="image/png, image/jpeg"
-                      type="file"
-                      ref={portfolioImgRef}
-                    />
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={clear} color="primary">
-                      Cancel
-                    </Button>
-                    <Button onClick={_ => addNewPortfolio()} color="primary">
-                      Add
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-              ) : null}
+
               <div style={{ display: 'flex', marginTop: '15px' }}>
                 <Button
                   onClick={() =>
@@ -744,13 +546,7 @@ export default function FullWidthTabs(props) {
                       desc: desc,
                       bg: bg,
                       template: template,
-                      bgtype: bgtype,
-                      content:
-                        template === 'template1'
-                          ? []
-                          : template === 'template3'
-                          ? portfolio
-                          : content
+                      bgtype: bgtype
                     })
                   }
                   style={{ marginRight: '15px' }}
