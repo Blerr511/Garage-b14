@@ -1,9 +1,10 @@
 .portfolio {
-  width: 80%;
+  width: 75%;
   min-height: 80vh;
   background-position: center;
   background-size: cover;
   padding: 10vh 10%;
+  padding-top: 15%;
   position: relative;
 }
 .portfolio > div {

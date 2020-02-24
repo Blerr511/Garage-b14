@@ -40,18 +40,20 @@ module.exports.add = async (req, res) => {
         /\\/g,
         '/'
       );
+      const images = [];
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (file.fieldname === 'thumbnail') {
           thumbnail = (appRoot + '\\' + file.path).replace(/\\/g, '/');
+        } else if (file.fieldname === 'model') {
+          images.push((appRoot + '\\' + file.path).replace(/\\/g, '/'));
         }
       }
-      console.log(req.modelFiles);
       const content = new Service({
         title: title,
         desc: desc,
         img: thumbnail,
-        other: req.modelFiles
+        other: images
       });
       await content.save();
       const t = await Page.updateOne(

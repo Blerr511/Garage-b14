@@ -15,6 +15,13 @@ export const styles = makeStyles(theme => ({
     overflow: 'hidden',
     backgroundColor: theme.palette.background.paper
   },
+  author: {
+    color: '#ffffff',
+    fontSize: '16px',
+    margin: '8px 0px',
+    textTransform: 'capitalize',
+    wordSpacing: '7px'
+  },
   tags: {
     zIndex: 10,
     position: 'absolute',

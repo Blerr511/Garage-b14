@@ -146,7 +146,6 @@ function VerticalTabs(props) {
       thumbnail: portoflioThumbRef.current.files[0],
       model: portfolioModelRef.current.files
     };
-    console.log(files);
     const closeDialog = () => setPortfolioDialog(false);
     props.addContentHundler(pageId, title, desc, files, closeDialog);
     if (contentTitleRef.current) contentTitleRef.current.value = '';
@@ -493,12 +492,12 @@ function VerticalTabs(props) {
                             </tr>
                             <tr>
                               <td>
-                                <Typography>Model:</Typography>
+                                <Typography>Images:</Typography>
                               </td>
                               <td>
                                 {' '}
                                 <input
-                                  accept=".jpg , .jpeg , .png , .zip"
+                                  accept=".jpg , .jpeg , .png"
                                   type="file"
                                   multiple
                                   ref={portfolioModelRef}
@@ -831,7 +830,6 @@ const Pages = () => {
         if (file[k] instanceof FileList)
           for (let i = 0; i < file[k].length; i++) {
             const f = file[k][i];
-            console.log(f);
             formData.append(k, f);
           }
         else if (file[k] instanceof File) {
@@ -842,7 +840,6 @@ const Pages = () => {
     formData.append('pageId', pageId);
     setLoading(true);
     closeDialog();
-    console.log(formData);
     fetch(`${process.env.SERVER}/api/addContent`, {
       method: 'POST',
       body: formData

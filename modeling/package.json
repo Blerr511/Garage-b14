@@ -59,6 +59,7 @@
     "react-dom": "^16.10.2",
     "react-grid-gallery": "^0.5.5",
     "react-html-parser": "^2.0.2",
+    "react-image-gallery": "^1.0.6",
     "react-router-dom": "^5.1.2",
     "react-scroll-parallax": "^2.2.0",
     "react-swipeable-views": "^0.13.3",

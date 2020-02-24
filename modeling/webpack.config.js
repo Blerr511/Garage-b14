@@ -54,7 +54,7 @@ module.exports = (env, argv) => {
         'process.env.TINYAPIKEY': JSON.stringify(dotenv.parsed.TINYAPIKEY),
         'process.env.SERVER': isProduction
           ? JSON.stringify(dotenv.parsed.SERVER)
-          : 'http://localhost:8080'
+          : JSON.stringify('http://localhost:8080')
       }),
       new ErrorOverlayPlugin(),
       new CopyWebpackPlugin([{ from: 'src/assets', to: 'assets' }])
@@ -64,7 +64,7 @@ module.exports = (env, argv) => {
       splitChunks: {
         chunks: 'async',
         minSize: 30000,
-        maxSize: 3000000,
+        maxSize: 8000000,
         minChunks: 1,
         maxAsyncRequests: 5,
         maxInitialRequests: 3,

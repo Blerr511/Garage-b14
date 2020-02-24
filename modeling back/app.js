@@ -15,7 +15,10 @@ const http = require('http'),
 
 try {
   dotenv.config();
-  global.appRoot = process.env.DOMAIN;
+  global.appRoot =
+    process.argv[2] === 'development'
+      ? process.env._DOMAIN
+      : process.env.DOMAIN;
   global.appDir = '/';
   global._appDirname = __dirname;
   const storage = multer.diskStorage({
@@ -94,7 +97,10 @@ try {
 
   // const server = http.Server(app);
   const corsOptions = {
-    origin: ['https://garageb14.com', 'http://garageb14.com'],
+    origin:
+      process.argv[2] === 'development'
+        ? 'http://localhost:3000'
+        : ['https://garageb14.com', 'http://garageb14.com'],
     credentials: true,
     allowedHeaders: [
       'Access-Control-Allow-Origin',
@@ -167,68 +173,11 @@ try {
 
     return arrayOfFiles;
   };
-  const unzipper = (req, res, next) => {
-    let hasZip = false;
-    for (let i = 0; i < req.files.length; i++) {
-      const file = req.files[i];
-      if (path.extname(file.originalname) === '.zip') hasZip = true;
-    }
 
-    if (!hasZip) next();
-    for (let i = 0; i < req.files.length; i++) {
-      const file = req.files[i];
-      if (path.extname(file.originalname) === '.zip') {
-        const uploadedFiles = getAllFiles(file.destination);
-        const stream = fs
-          .createReadStream(file.path)
-          .pipe(unzip.Extract({ path: file.destination }));
-        stream.on('close', e => {
-          fs.unlinkSync(path.join(__dirname, file.path));
-          const filesAfterUnzip = getAllFiles(file.destination);
-
-          const unzipedFiles = filesAfterUnzip.filter(
-            el => !uploadedFiles.includes(el)
-          );
-          req.modelFiles = { model: '', texture: [], material: '' };
-          unzipedFiles.map(el => {
-            const extName = path.extname(el);
-            if (
-              extName === '.obj' ||
-              extName === '.gltf' ||
-              extName === '.glb' ||
-              extName === '.fbx'
-            ) {
-              req.modelFiles.model = appRoot + '\\' + el.replace(/\\/g, '/');
-            } else if (extName === '.mtl') {
-              req.modelFiles.material = appRoot + '\\' + el.replace(/\\/g, '/');
-            } else if (
-              mime.lookup(el) &&
-              mime.lookup(el).split('/')[0] === 'image'
-            ) {
-              req.modelFiles.texture.push(
-                (appRoot + '\\' + el).replace(/\\/g, '/')
-              );
-            }
-          });
-          return next();
-        });
-      }
-    }
-  };
   app.post('/api/addpage', upload.any(), addPages);
   app.get('/api/get', getPages);
   app.get('/api/getSingle', getSinglePage);
-  app.post(
-    '/api/addContent',
-    (req, res, next) => {
-      res.setHeader('Access-Control-Allow-Origin', process.env.CLIENT);
-      res.setHeader('Content-Type', 'application/octet-stream');
-      next();
-    },
-    upload.any(),
-    unzipper,
-    addContent
-  );
+  app.post('/api/addContent', upload.any(), addContent);
   app.post('/api/removeContent', upload.none(), removeContent);
   app.post('/api/removePage', upload.none(), removePage);
   app.post('/api/editPage', upload.single('bg'), editPage);

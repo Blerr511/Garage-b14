@@ -1,16 +1,61 @@
 import React, { useState } from 'react';
 import { styles } from '../../styles/main';
 import Dialog from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
-import Model from '../modelVieverComponent/App';
 import ArrowPaginate from '../ArrowPaginate/ArrowPaginate';
+import ImageGallery from 'react-image-gallery';
+import 'react-image-gallery/styles/css/image-gallery.css';
 const GridGalarey = _ => {
   const { items } = _;
   const classes = styles();
   const [currentIndex, setCurentIndex] = useState(-1);
-  const catchHundler = _ => setCurentIndex(-1);
+
+  const _items =
+    currentIndex >= 0 && items[currentIndex].other
+      ? items[currentIndex].other.map(el => ({
+          original: el,
+          thumbnail: el,
+          originalTitle: items[currentIndex].title,
+          description:"Author   :   " +  items[currentIndex].title,
+          thumbnailAlt: items[currentIndex].title
+        }))
+      : [];
+
   return (
     <div className={classes.flexWrap} style={{ justifyContent: 'flex-start' }}>
+      <Dialog
+        open={currentIndex != -1}
+        onClose={_ => setCurentIndex(-1)}
+        fullWidth={true}
+        maxWidth={'lg'}
+        PaperProps={{
+          style: {
+            backgroundColor: 'transparent',
+            width: 'inherit',
+            overflow: 'hidden'
+          }
+        }}
+      >
+        {' '}
+        {currentIndex >= 0 && (
+          <ImageGallery items={_items} showPlayButton={false} />
+        )}
+        <ArrowPaginate
+          style={{ background: 'white', border: '1px solid black' }}
+          component="div"
+          count={items.length}
+          rowsPerPage={1}
+          page={currentIndex}
+          marginBorders={_.matchMedia ? '1%' : '5%'}
+          onChangePage={_ => {
+            setCurentIndex(_);
+          }}
+          lazyLoad={true}
+          onChangeRowsPerPage={_ => {
+            setLimit(_.target.value);
+            setPage(0);
+          }}
+        />
+      </Dialog>
       {items.map((el, id) => {
         const img = new Image();
         img.src = el.img;
@@ -39,52 +84,6 @@ const GridGalarey = _ => {
           </div>
         );
       })}
-      <Dialog
-        open={currentIndex != -1}
-        onClose={_ => setCurentIndex(-1)}
-        fullWidth={true}
-        maxWidth={'lg'}
-        PaperProps={{
-          style: {
-            backgroundColor: 'transparent',
-            width: 'inherit',
-            overflow: 'hidden'
-          }
-        }}
-      >
-        {currentIndex >= 0 && (
-          <React.Fragment>
-            {items[currentIndex] &&
-            items[currentIndex].other &&
-            items[currentIndex].other.model ? (
-              <Model
-                modelPath={items[currentIndex].other.model}
-                envPath={process.env.SERVER + '/uploads/cube/'}
-                texture={items[currentIndex].other.texture}
-                material={items[currentIndex].other.material}
-                catchHundler={catchHundler}
-              />
-            ) : (
-              <img height={700} src={items[currentIndex].img} />
-            )}
-          </React.Fragment>
-        )}
-        <ArrowPaginate
-          style={{ background: 'white', border: '1px solid black' }}
-          component="div"
-          count={items.length}
-          rowsPerPage={1}
-          page={currentIndex}
-          marginBorders={_.matchMedia ? '1%' : '5%'}
-          onChangePage={_ => {
-            setCurentIndex(_);
-          }}
-          onChangeRowsPerPage={_ => {
-            setLimit(_.target.value);
-            setPage(0);
-          }}
-        />
-      </Dialog>
     </div>
   );
 };
