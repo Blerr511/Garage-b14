@@ -64,7 +64,7 @@ module.exports = (env, argv) => {
       splitChunks: {
         chunks: 'async',
         minSize: 30000,
-        maxSize: 8000000,
+        maxSize: 3000000,
         minChunks: 1,
         maxAsyncRequests: 5,
         maxInitialRequests: 3,
