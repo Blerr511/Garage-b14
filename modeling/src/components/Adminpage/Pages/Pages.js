@@ -837,6 +837,10 @@ const Pages = () => {
         }
       }
     }
+    if(file instanceof File)
+    {
+      formData.append('file', file);
+    }
     formData.append('pageId', pageId);
     setLoading(true);
     closeDialog();
