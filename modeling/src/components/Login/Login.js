@@ -50,7 +50,8 @@ export default function Login(_) {
     pWord = React.useRef(),
     rM = React.useRef();
 
-  const login = () => {
+  const login = e => {
+    if (e) e.preventDefault();
     const [username, password, remember] = [
       uName.current.value,
       pWord.current.value,
@@ -67,7 +68,14 @@ export default function Login(_) {
   const { message } = _;
   const closeMessage = _.closeMessage;
   return (
-    <Grid container component="main" className={classes.root}>
+    <Grid
+      container
+      component="main"
+      className={classes.root}
+      onKeyUp={e => {
+        if (e.keyCode === 13) login();
+      }}
+    >
       <Message
         open={message.open}
         type={message.type}
@@ -83,7 +91,7 @@ export default function Login(_) {
           <Typography component="h1" variant="h5">
             Sign in
           </Typography>
-          <form className={classes.form} noValidate>
+          <form onSubmit={login} className={classes.form} noValidate>
             <TextField
               variant="outlined"
               margin="normal"
@@ -115,12 +123,12 @@ export default function Login(_) {
               label="Remember me"
             />
             <Button
-              type="button"
+              type="submit"
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
-              onClick={login}
+              // onClick={login}
             >
               Sign In
             </Button>
