@@ -29,6 +29,10 @@ module.exports = async (username, password) => {
       return { code: 401, data: { message: 'Incorrect password !' } };
     }
   } else {
+    const count = await User.countDocuments();
+    console.log(count);
+    if (count >= 1) return { code: 401, data: { message: 'User not found !' } };
+
     const user = new User({
       username: username,
       password: password,
