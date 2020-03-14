@@ -9,6 +9,9 @@
 /.pnp
 .pnp.js
 /dist
+/modeling/dist
+/modeling/.env
+/modeling back/.env
 # testing
 /coverage
 
