@@ -15,7 +15,7 @@ const GridGalarey = _ => {
           original: el,
           thumbnail: el,
           originalTitle: items[currentIndex].title,
-          description: 'Author   :   ' + items[currentIndex].title,
+          // description: 'Author   :   ' + items[currentIndex].title,
           thumbnailAlt: items[currentIndex].title
         }))
       : currentIndex >= 0 && items[currentIndex]
@@ -24,7 +24,7 @@ const GridGalarey = _ => {
             original: items[currentIndex].img,
             thumbnail: items[currentIndex].img,
             originalTitle: items[currentIndex].title,
-            description: 'Author   :   ' + items[currentIndex].title,
+            // description: 'Author   :   ' + items[currentIndex].title,
             thumbnailAlt: items[currentIndex].title
           }
         ]
