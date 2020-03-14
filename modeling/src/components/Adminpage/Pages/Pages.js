@@ -668,7 +668,7 @@ function VerticalTabs(props) {
                   );
                 })
               ) : null}
-              {el.style.template === 'template2' ? (
+              {el.style.template === 'template2' && id === value ? (
                 <ExpansionPanel
                   expanded={expanded}
                   onChange={_ => setExpanded(!expanded)}
