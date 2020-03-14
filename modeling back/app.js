@@ -12,7 +12,11 @@ const http = require('http'),
   unzip = require('unzipper'),
   mongoose = require('mongoose'),
   { debugLog, debugLogError } = require('./logger.js');
+global.defaultConsole = console.log;
 
+console.log = debugLog;
+console.error = debugLogError;
+console.info = debugLog;
 try {
   dotenv.config();
   global.appRoot =
@@ -209,7 +213,7 @@ try {
   app.post('/api/mails/rm', upload.none(), rmMail);
 
   app.listen(process.env.APP_PORT || 8080, () =>
-    console.info(`app listen ${process.env.APP_PORT || 8080}`)
+    console.info(`app listen ${process.env.APP_PORT || 8080}`,new Date())
   );
 } catch (error) {
   debugLog(error);
