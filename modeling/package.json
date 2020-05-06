@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --mode development --open --hot",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "deploy": "gh-pages -d build"
   },
   "repository": {
     "type": "git",
@@ -16,7 +17,7 @@
   "bugs": {
     "url": "https://github.com/Blerr511/modeling_v2/issues"
   },
-  "homepage": "https://github.com/Blerr511/modeling_v2#readme",
+  "homepage": "https://blerr511.github.io/Garage-b14/",
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "@babel/preset-env": "^7.6.3",
@@ -29,6 +30,7 @@
     "dotenv-webpack": "^1.7.0",
     "error-overlay-webpack-plugin": "^0.4.1",
     "file-loader": "^4.2.0",
+    "gh-pages": "^2.2.0",
     "html-webpack-plugin": "^3.2.0",
     "less": "^3.10.3",
     "less-loader": "^5.0.0",
