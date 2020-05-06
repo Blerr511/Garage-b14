@@ -1,9 +1,0 @@
-{
-  "client": {
-    "hostname": "http://localhost:2000"
-  },
-
-  "JWTsecret": "BlerrIsHeree",
-  "logPath": "/log",
-  "logFilename": "node.log"
-}
