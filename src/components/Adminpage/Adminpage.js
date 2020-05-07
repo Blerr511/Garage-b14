@@ -37,7 +37,7 @@ class Adminpage extends Component {
     this.setState({
       component: (
         <div className="adminpage">
-          <BrowserRouter>
+          <BrowserRouter basename={process.env.PUBLIC_URL} >
             <Sidebar routes={_routes} setAdminState={this.setAdminState} />
             <Switch>
               {routes[0] && (
